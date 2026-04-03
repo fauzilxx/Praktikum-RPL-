@@ -1,4 +1,4 @@
-# Team Contract - [Nama Kelompok/Proyek Anda]
+# Team Contract - [Nama Project]
 
 Dokumen ini merupakan kesepakatan resmi anggota tim untuk memastikan kelancaran kolaborasi selama praktikum Rekayasa Perangkat Lunak (RPL).
 
