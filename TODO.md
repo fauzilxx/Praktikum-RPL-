@@ -1,1 +1,7 @@
-# Dashboard PHP Task Progress&#10;&#10;## Plan Steps:&#10;1. [x] Create TODO.md for tracking&#10;2. [x] Create src/dashboard.php with basic PHP dashboard&#10;3. [ ] Test with PHP server&#10;4. [ ] Complete task
+# ✅ Task List ALTIGUIDE
+
+- [x] Inisialisasi Repositori
+- [/] Merapikan Struktur Folder
+- [ ] Membuat Mockup UI (Diva)
+- [ ] Perancangan Database (Fauzil)
+- [ ] Setup Testing Environment (Adrian)
