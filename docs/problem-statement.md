@@ -1,0 +1,7 @@
+# Problem Statement: AltiGuide
+
+Para pendaki gunung, baik pemula maupun profesional, sering kali mengalami kesulitan dalam mempersiapkan ekspedisi mereka, terutama terkait pengurusan birokrasi izin pendakian (Simaksi) yang masih dilakukan secara manual di lokasi dan minimnya akses terhadap informasi *basecamp* serta cuaca yang terpusat. Ketika merencanakan pendakian di masa liburan atau akhir pekan, sistem yang masih konvensional ini menyebabkan antrean panjang di pos keberangkatan, ketidakpastian sisa kuota pendakian, serta persiapan logistik yang tidak matang akibat perubahan cuaca gunung yang tak terduga. 
+
+Di sisi lain, pihak pengelola jalur pendakian (*Ranger*) juga mengalami kesulitan dalam mendata, memverifikasi, dan memantau pergerakan jumlah pendaki secara *real-time* ketika lonjakan pengunjung terjadi. Proses pencatatan yang belum terdigitalisasi ini menyebabkan beban administratif yang tinggi, ketidakefisienan operasional, dan menghambat respons cepat jika terjadi keadaan darurat karena rekapitulasi data pendaki berserakan.
+
+Solusi berupa aplikasi manajemen pendakian terpadu bernama **AltiGuide** diharapkan dapat menyelesaikan kendala tersebut dengan mendigitalisasi proses Simaksi menjadi *online*, menyediakan pusat informasi *basecamp* dan prediksi cuaca yang akurat bagi pendaki, serta menghadirkan dasbor admin yang komprehensif bagi pengelola. Melalui integrasi fitur ini, AltiGuide bertujuan untuk memangkas birokrasi yang rumit, mengefisienkan operasional *basecamp*, serta meningkatkan persentase kenyamanan dan keselamatan pendaki.
