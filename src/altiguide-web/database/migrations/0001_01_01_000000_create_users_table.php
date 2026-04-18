@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('address');
             $table->string('emergency_contact', 15);
             $table->timestamps();
-            $table->string('nik', 30)->unique();
+            $table->string('nik', 16)->unique();
             $table->rememberToken();
 
         });
