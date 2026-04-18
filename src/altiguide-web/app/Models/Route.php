@@ -31,4 +31,14 @@ class Route extends Model
     {
         return $this->hasMany(HikingSession::class);
     }
+
+    public function routeInfo()
+    {
+        return $this->hasOne(RouteInfo::class);
+    }
+
+    public function waypoints()
+    {
+        return $this->hasMany(RouteWaypoint::class)->orderBy('order_index', 'asc');
+    }
 }
