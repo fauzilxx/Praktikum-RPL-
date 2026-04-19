@@ -64,8 +64,8 @@ Pengiriman data formulir pendaftaran harus dilindungi dengan enkripsi protokol *
 #### NFR-03: Scalability
 Sistem backend harus mampu menangani:
 - Hingga **100 permintaan serentak (concurrent requests)**
-- Tanpa latency rata-rata lebih dari **3 detik**
-- Tanpa adanya permintaan yang gagal (**0% error rate**)
+- Dengan latency rata-rata tidak lebih dari **3 detik**
+- Dengan tingkat keberhasilan permintaan minimal **99.9%** (atau error rate maksimal **0.1%**) dalam window pengamatan yang didefinisikan
 
 ---
 
