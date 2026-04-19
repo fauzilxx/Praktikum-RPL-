@@ -96,4 +96,4 @@
 **Acceptance Criteria:**
 - **AC-1 (Normal):** Sistem menampilkan indikator posisi pengguna (blue dot) secara real-time di atas garis jalur resmi pada peta.
 - **AC-2 (Alternatif - Off-Route Alert):** Jika posisi pengguna terdeteksi menyimpang lebih dari 50 meter dari jalur resmi, sistem harus memberikan notifikasi peringatan "Anda berada di luar jalur!".
-- **AC-3 (Error - GPS Nonaktif):** Jika sensor GPS perangkat dimatikan oleh pengguna, sistem ha
+- **AC-3 (Error - GPS Nonaktif):** Jika sensor GPS perangkat dimatikan oleh pengguna, sistem harus menampilkan permintaan akses lokasi dengan pesan "Aktifkan GPS untuk memulai navigasi".
