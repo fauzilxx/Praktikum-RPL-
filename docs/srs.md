@@ -15,7 +15,9 @@ ALTIGUIDE dirancang untuk memudahkan pendaki dalam:
 
 ## 3. Kebutuhan Fungsional (Functional Requirements)
 
-### Fitur Inti: Manajemen Pendaftaran & Verifikasi Simaksi (Must-Have)
+> **Catatan Prioritas:** Dokumen SRS ini menggunakan skema prioritas **High/Medium/Low**. Untuk konsistensi dengan `docs/backlog.md`, pemetaannya adalah: **High = Must-have**, **Medium = Should-have**, dan **Low = Could-have**.
+
+### Fitur Inti: Manajemen Pendaftaran & Verifikasi Simaksi
 
 #### FR-01
 Sistem menyediakan formulir digital bagi Pendaki untuk mengisi data diri dan memilih tanggal pendakian.  
@@ -35,7 +37,7 @@ Sistem menampilkan visualisasi prediksi cuaca dan suhu di area gunung untuk jang
 #### FR-04
 Sistem menyediakan dasbor khusus bagi Admin untuk mengelola dan memperbarui data informasi basecamp.  
 - **Prioritas:** High  
-- **Ref:** US-02  
+- **Ref:** US-04  
 
 #### FR-05
 Sistem memperbarui sisa kuota gunung secara real-time dan mengubah status pendaki menjadi **"Disetujui"** setelah verifikasi Admin selesai.  
