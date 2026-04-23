@@ -17,6 +17,9 @@ return new class extends Migration
             $table->foreignId('route_id')->constrained('routes')->onDelete('cascade');
             $table->foreignUuid('transaction_id')->constrained('transactions')->onDelete('cascade');
             $table->string('group_name', 100);
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->enum('hike_type', ['tektok', 'camp'])->default('camp');
             $table->enum('status', ['prepared', 'on_track', 'finished'])->default('prepared');
             $table->timestamps();
         });

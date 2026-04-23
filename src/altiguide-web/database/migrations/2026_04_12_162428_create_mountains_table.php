@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('mountains', function (Blueprint $table) {
             $table->id('id')->primary();
             $table->string('name', 100);
+            $table->string('slug')->unique();
             $table->string('location', 100); // Kabupaten/Provinsi
             $table->integer('altitude'); // MDPL
             $table->text('description')->nullable(); 

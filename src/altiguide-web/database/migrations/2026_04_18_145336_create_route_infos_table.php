@@ -17,6 +17,8 @@ return new class extends Migration
             $table->text('basecamp_address')->nullable();
             $table->integer('basecamp_altitude')->nullable();
             $table->decimal('simaksi_price', 10, 2)->nullable();
+            $table->decimal('ojek_price', 10, 2)->nullable();
+            $table->text('ojek_description')->nullable();
             $table->text('facilities_description')->nullable();
             $table->text('logistics_description')->nullable();
             $table->timestamps();

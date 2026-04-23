@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mountain extends Model
 {
+    use \App\Traits\HasSlug;
+
     protected $fillable = [
         'name',
+        'slug',
         'location',
         'altitude',
         'description',
