@@ -6,12 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Route extends Model
 {
+    use \App\Traits\HasSlug;
+
     protected $fillable = [
         'name',
+        'slug',
         'distance',
         'estimated_time',
         'mountain_id',
         'difficulty',
+        'image',
         'is_active',
         'latitude',
         'longitude',

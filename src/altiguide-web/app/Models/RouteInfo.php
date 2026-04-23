@@ -11,6 +11,8 @@ class RouteInfo extends Model
         'basecamp_address',
         'basecamp_altitude',
         'simaksi_price',
+        'ojek_price',
+        'ojek_description',
         'facilities_description',
         'logistics_description',
     ];

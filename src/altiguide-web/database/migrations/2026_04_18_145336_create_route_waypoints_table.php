@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id('id')->primary();
             $table->foreignId('route_id')->constrained('routes')->onDelete('cascade');
             $table->string('name', 150);
+            $table->string('slug')->unique();
+            $table->string('image')->nullable();
             $table->integer('altitude')->nullable();
             $table->integer('order_index')->default(0);
             $table->decimal('distance_from_prev', 6, 2)->nullable(); // Jarak dalam km
