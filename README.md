@@ -20,16 +20,16 @@ Setiap anggota bertanggung jawab atas tugas utama berikut:
   * Mengelola dokumentasi teknis dalam repositori seperti file README, Wiki, dan dokumentasi endpoint API.
   * Memastikan seluruh artefak proyek (diagram UML, ERD) terdokumentasi dengan rapi sesuai standar RPL.
 
-* **Diva Valencia Christianarta**: **UI/UX Designer & Frontend**
+* **Diva Valencia Christianarta**: **UI/UX Designer**
   * Bertanggung jawab atas riset pengalaman pengguna dan pembuatan desain *high-fidelity* (Mockup) serta Prototype.
   * Mengimplementasikan desain antarmuka menjadi kode frontend yang responsif dan user-friendly.
   * Memastikan konsistensi visual (warna, tipografi, dan aset gambar) di seluruh bagian aplikasi.
 
 ## 2. Jadwal Pertemuan (Meeting Schedule)
 Pertemuan rutin dilakukan untuk sinkronisasi progress:
-* **Hari**: [Misal: Setiap hari Jumat]
-* **Waktu**: [Misal: 19.00 WIB - Selesai]
-* **Platform**: [Misal: Google Meet / Discord / Zoom/ Offline]
+* **Hari**: Setiap hari Jumat
+* **Waktu**:  19.00 WIB - Selesai
+* **Platform**:  Google Meet / Discord / Zoom/ Offline
 * **Agenda**: Update progress mingguan, pembagian task baru, dan penyelesaian kendala teknis.
 
 ## 3. Saluran Komunikasi (Communication Channels)
@@ -39,7 +39,7 @@ Pertemuan rutin dilakukan untuk sinkronisasi progress:
 
 ## 4. Aturan Respons (Communication Policy)
 Untuk menjaga efisiensi kerja, seluruh anggota tim menyepakati:
-* **Jam Aktif**: [Misal: 09:00 - 17:00 WIB].
+* **Jam Aktif**: 09:00 - 17:00 WIB
 * **Waktu Respons**: Maksimal **2 jam** setelah pesan dikirimkan pada jam aktif.
 * **Ketersediaan**: Jika anggota akan tidak aktif (berhalangan) lebih dari 12 jam, wajib menginfokan tim terlebih dahulu.
 
