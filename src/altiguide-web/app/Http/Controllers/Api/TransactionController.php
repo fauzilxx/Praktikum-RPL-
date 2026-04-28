@@ -8,6 +8,7 @@ use App\Models\HikingSession;
 use App\Models\HikingMember;
 use App\Models\Route;
 use App\Models\RouteInfo;
+use App\Jobs\SendETicketJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionController extends Controller
 {
@@ -29,15 +31,24 @@ class TransactionController extends Controller
 
     /**
      * List semua transaksi milik user yang sedang login.
+     * Modifikasi: Relasikan data Gunung/Rute, agar bisa digambar cantik di UI HP/Web.
      */
     public function index(Request $request)
     {
         $transactions = $request->user()
             ->transactions()
+            ->with([
+                'hikingSession.route.mountain', // Supaya frontend tau nama gunung dan rute
+                'hikingSession.members:id,hiking_session_id' // Minimal untuk tahu jumlah total member per transaksi
+            ])
             ->orderByDesc('created_at')
             ->get();
 
-        return response()->json($transactions);
+        // Modifikasi Data yang dikirim (jika diperlukan) atau return secara langsung
+        return response()->json([
+            'status' => 'success',
+            'data'   => $transactions
+        ]);
     }
 
     /**
@@ -208,8 +219,16 @@ class TransactionController extends Controller
         $fraud = $notification->fraud_status;
 
         if ($status == 'capture' || $status == 'settlement') {
+            // Cegah pengiriman email dobel jika Midtrans terpaksa mengirim notifikasi ulang
+            $isAlreadySettled = $transaction->status === 'settlement';
+            
             $transaction->status = 'settlement';
             $transaction->payment_type = $type;
+
+            // Jika ini pertama kalinya lunas, lemparkan tugas ke Queue Worker (Background)
+            if (!$isAlreadySettled) {
+                dispatch(new SendETicketJob($transaction));
+            }
         } else if ($status == 'cancel' || $status == 'deny' || $status == 'expire') {
             $transaction->status = 'expire';
             
@@ -245,5 +264,40 @@ class TransactionController extends Controller
             'status' => 'success',
             'data'   => $transaction
         ]);
+    }
+
+    /**
+     * Generate PDF untuk E-Ticket berdasarkan Transaction ID.
+     */
+    public function downloadPdf(Request $request, $id)
+    {
+        // 1. Validasi Pemilik dan Status
+        // Kita hanya mencari transaksi yang merupakan milik user yang login.
+        $transaction = $request->user()
+            ->transactions()
+            ->with([
+                'user',
+                'hikingSession.route.mountain',
+                'hikingSession.members'
+            ])
+            ->findOrFail($id);
+
+        // 2. Validasi Pembayaran
+        if ($transaction->status !== 'settlement') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Tiket PDF hanya dapat diakses untuk transaksi yang sudah dilunasi.'
+            ], 403);
+        }
+
+        // 3. Render View ke PDF menggunakan DomPDF. 
+        // File view yang digunakan adalah resources/views/pdf/eticket.blade.php
+        $pdf = Pdf::loadView('pdf.eticket', ['transaction' => $transaction]);
+
+        // 4. Return Output via Download
+        $filename = 'E-Ticket-' . $transaction->order_id . '.pdf';
+        
+        // Jika ingin PDF langsung tampil di browser (Inline mode), ganti download() dengan stream()
+        return $pdf->stream($filename);
     }
 }
