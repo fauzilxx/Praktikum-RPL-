@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/transactions',       [TransactionController::class, 'index']);
     Route::post('/transactions',      [TransactionController::class, 'store']);
     Route::get('/transactions/{id}',  [TransactionController::class, 'show']);
+    Route::get('/transactions/{id}/pdf', [TransactionController::class, 'downloadPdf']);
 
     // Validasi Pemesanan Pendaki
     Route::post('/validate-nik', [MemberValidationController::class, 'validateNik']);
@@ -54,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/hiking-sessions/{id}',  [HikingSessionController::class, 'show']);
 });
 
-// ── Webhook Midtrans (WAJIB DARTUAR AUTH-Sanctum/Token) ───────────
+// ── Webhook Midtrans (WAJIB DAFTAR AUTH-Sanctum/Token) ───────────
 Route::post('/midtrans/callback', [TransactionController::class, 'callback']);
 
 // ── API Admin / Basecamp (Sistem Penjagaan & Scan Tiket) ───────────
