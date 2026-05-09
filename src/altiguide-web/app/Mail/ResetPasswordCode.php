@@ -24,7 +24,7 @@ class ResetPasswordCode extends Mailable
         $this->userName = $userName;
     }
 
-    public function envelope(): Envelope
+      public function envelope(): Envelope
     {
         return new Envelope(
             subject: 'AltiGuide — Kode Reset Password',

@@ -29,9 +29,11 @@ Route::post('/login',    [AuthController::class, 'login']);
 // Data gunung & rute bisa diakses tanpa login
 Route::get('/mountains',      [MountainController::class, 'index']);
 Route::get('/mountains/{id}', [MountainController::class, 'show']);
+Route::get('/mountains/{id}/weather', [MountainController::class, 'weather']);
 
 Route::get('/routes',      [RouteController::class, 'index']);
 Route::get('/routes/{id}', [RouteController::class, 'show']);
+Route::get('/routes/{id}/weather', [RouteController::class, 'weather']);
 
 // ── Protected Routes (perlu Bearer token) ───────────────────────────────
 
