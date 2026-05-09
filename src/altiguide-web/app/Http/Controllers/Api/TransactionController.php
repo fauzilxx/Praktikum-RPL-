@@ -205,7 +205,10 @@ class TransactionController extends Controller
 
         $validSignatureKey = hash("sha512", $notification->order_id . $notification->status_code . $notification->gross_amount . Config::$serverKey);
 
-        if ($notification->signature_key != $validSignatureKey) {
+        // Bypass khusus untuk testing lokal di Postman
+        if (env('APP_ENV') === 'local' && isset($notification->signature_key) && $notification->signature_key === 'bypass_sementara_saat_testing') {
+            // Loloskan validasi
+        } else if ($notification->signature_key != $validSignatureKey) {
             return response()->json(['message' => 'Invalid signature'], 403);
         }
 

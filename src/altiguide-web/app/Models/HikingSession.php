@@ -14,6 +14,9 @@ class HikingSession extends Model
         'route_id',
         'transaction_id',
         'group_name',
+        'start_date',
+        'end_date',
+        'hike_type',
         'status',
     ];
 
