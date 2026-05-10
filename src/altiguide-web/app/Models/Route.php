@@ -19,6 +19,11 @@ class Route extends Model
         'is_active',
         'latitude',
         'longitude',
+        'track_coordinates',
+    ];
+
+    protected $casts = [
+        'track_coordinates' => 'array',
     ];
 
     public function mountain()

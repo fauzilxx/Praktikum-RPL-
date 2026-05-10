@@ -135,6 +135,64 @@ class SlametSeeder extends Seeder
             );
         }
 
+        // ==========================================
+        // PARSE GPX BAMBANGAN (BASECAMP - PUNCAK)
+        // ==========================================
+        $gpxPathBambangan = database_path('data/slamet-via-bambangan.gpx');
+        if (file_exists($gpxPathBambangan)) {
+            $gpxBambangan = simplexml_load_file($gpxPathBambangan);
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpxBambangan->trk->trkseg->trkpt)) {
+                foreach ($gpxBambangan->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Potong dari awal sampai puncak saja
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $bambangan->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapBambangan = [
+                'Pos 1 Pondok Gembirung' => 'Pos 1 Pondok Gembirung',
+                'Pos 2 Pondok Walang' => 'Pos 2 Pondok Walang',
+                'Pos 3 Pondok Cemara' => 'Pos 3 Pondok Cemara',
+                'Pos 4 Samarantu' => 'Pos 4 Samarantu',
+                'Pos 5 Samhyang Rangkah' => 'Pos 5 Samyang Rangkah',
+                'Pos 6 Samhyang Ketebonan' => 'Pos 6 Samyang Ketebonan',
+                'Pos 7 Samhyang Kendhit' => 'Pos 7 Samyang Kendit',
+                'Pos 8 Samhyang Jampang' => 'Pos 8 Samyang Jampang',
+                'Pos 9 Pelawangan' => 'Pos 9 Plawangan',
+            ];
+
+            if (isset($gpxBambangan->wpt)) {
+                foreach ($gpxBambangan->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    if (isset($waypointMapBambangan[$gpxName])) {
+                        $bambangan->waypoints()->where('name', $waypointMapBambangan[$gpxName])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
+        }
+
         // 2. VIA PERMADI GUCI
         $permadi = Route::firstOrCreate(
             ['mountain_id' => $slamet->id, 'name' => 'Gunung Slamet via Permadi Guci'],
@@ -216,6 +274,46 @@ class SlametSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX PERMADI GUCI (FULL TRACK)
+        // ==========================================
+        $gpxPathPermadi = database_path('data/trail-run-tektok-slamet-via-permadi-guci.gpx');
+        if (file_exists($gpxPathPermadi)) {
+            $gpxPermadi = simplexml_load_file($gpxPathPermadi);
+            $trackCoordinates = [];
+
+            if (isset($gpxPermadi->trk->trkseg->trkpt)) {
+                foreach ($gpxPermadi->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                $permadi->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapPermadi = [
+                'POS 1 TERDAPAT LAHAN YG CUKUP UNTUK MENAMPUNG SEKITAR 5 TEND...' => 'Pos 1 Blakbak',
+                'POS 2' => 'Pos 2 Rimpakan',
+                'POS 3' => 'Pos 3 Selo Pethak',
+                'Pos 4' => 'Pos 4 Ranu Amreta',
+                'Pos 5 batas vegetasi' => 'Pos 5 Watu Ireng / Pondok Cantigi / Plawangan',
+                'Mountain pass' => 'Puncak Salam Permadi & Puncak Surono',
+            ];
+
+            if (isset($gpxPermadi->wpt)) {
+                foreach ($gpxPermadi->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    if (isset($waypointMapPermadi[$gpxName])) {
+                        $permadi->waypoints()->where('name', $waypointMapPermadi[$gpxName])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
         }
 
         // 3. VIA GUNUNG MALANG
@@ -315,6 +413,51 @@ class SlametSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX GUNUNG MALANG (REVERSE TRACK)
+        // ==========================================
+        $gpxPathMalang = database_path('data/gunung-slamet-via-gunung-malang.gpx');
+        if (file_exists($gpxPathMalang)) {
+            $gpxMalang = simplexml_load_file($gpxPathMalang);
+            $trackCoordinates = [];
+
+            if (isset($gpxMalang->trk->trkseg->trkpt)) {
+                foreach ($gpxMalang->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                
+                // Track direkam dari puncak ke basecamp, jadi harus di-reverse
+                $trackCoordinates = array_reverse($trackCoordinates);
+                
+                $malang->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapMalang = [
+                'Pos 1 wadas gantung' => 'Pos 1 Wadas Gantung',
+                'Pos 2 pondok shayang' => 'Pos 2 Pondok Syahang',
+                'Pos 3 pondok pasang' => 'Pos 3 Pondok Pasang',
+                'Pos 4 ihing' => 'Pos 4 Pondok Ihing / Mata Air',
+                'Pos 5' => 'Pos 5 Puncak Gunung Malang',
+                'Pos 6 pelawangan' => 'Pos 7 Plawangan',
+                'Summit slamet' => 'Puncak Gunung Slamet',
+            ];
+
+            if (isset($gpxMalang->wpt)) {
+                foreach ($gpxMalang->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    if (isset($waypointMapMalang[$gpxName])) {
+                        $malang->waypoints()->where('name', $waypointMapMalang[$gpxName])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
         }
     }
 }

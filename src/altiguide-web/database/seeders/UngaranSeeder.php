@@ -111,6 +111,52 @@ class UngaranSeeder extends Seeder
             );
         }
 
+        // 2b. PARSE GPX UNTUK UNGARAN VIA PERANTUNAN
+        $gpxPath = database_path('data/ungaran-via-perantunan.gpx');
+        if (file_exists($gpxPath)) {
+            $gpx = simplexml_load_file($gpxPath);
+            
+            // Ekstrak garis jalur (track points)
+            $trackCoordinates = [];
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                $perantunan->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            // Pemetaan nama Waypoint di GPX ke nama Waypoint di Database
+            $waypointMap = [
+                'Pos 1 Watu Omah' => 'Pos 1 Watu Omah',
+                'Pos 2 Watu Jajar' => 'Pos 2 Watu Jajar',
+                'Pos 3' => 'Pos Watu Srumpuk',
+                'Pos 4' => 'Pos 4 Kolo Keciko',
+                'Ondo Rante' => 'Pos 5 Tanjakan Cinta', 
+                'Puncak Bondolan' => 'Puncak Bondolan (camp)',
+                'Puncak Botak' => 'Puncak Botak',
+            ];
+
+            // Update koordinat waypoints
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMap[$gpxName])) {
+                        $dbName = $waypointMap[$gpxName];
+                        $perantunan->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+        }
+
         // 3. VIA MAWAR
         $mawar = Route::firstOrCreate(
             ['mountain_id' => $ungaran->id, 'name' => 'Gunung Ungaran via Mawar'],
@@ -206,6 +252,67 @@ class UngaranSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX MAWAR
+        // ==========================================
+        $gpxPathMawar = database_path('data/mt-ungaran-via-mawar-umbul-sidomukti.gpx');
+        if (file_exists($gpxPathMawar)) {
+            $gpxMawar = simplexml_load_file($gpxPathMawar);
+            
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpxMawar->trk->trkseg->trkpt)) {
+                foreach ($gpxMawar->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Sesuai request: Ambil dari puncak sampai basecamp, lalu REVERSE
+                if ($peakIndex > 0) {
+                    $descentTrack = array_slice($trackCoordinates, $peakIndex);
+                    $trackCoordinates = array_reverse($descentTrack);
+                }
+
+                $mawar->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapMawar = [
+                'POS 1' => 'Pos 1 Bedengan',
+                'POS2' => 'Pos 2 Kinatar',
+                'POS3 new route' => 'Pos Pronojiwo',
+                'POS3 - tea plantation' => 'Pos Pronojiwo',
+                'POS4' => 'Pos 4 Bukak’an',
+                'Summit' => 'Puncak Banteng Raider',
+            ];
+
+            if (isset($gpxMawar->wpt)) {
+                foreach ($gpxMawar->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapMawar[$gpxName])) {
+                        $dbName = $waypointMapMawar[$gpxName];
+                        $mawar->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
         }
 
     }

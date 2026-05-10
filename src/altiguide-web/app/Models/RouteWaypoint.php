@@ -13,6 +13,8 @@ class RouteWaypoint extends Model
         'name',
         'slug',
         'altitude',
+        'latitude',
+        'longitude',
         'order_index',
         'distance_from_prev',
         'estimated_time_minutes',
