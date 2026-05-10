@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\RouteController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\HikingSessionController;
 use App\Http\Controllers\Api\MemberValidationController;
+use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\ChangePasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,26 +37,33 @@ Route::get('/routes',      [RouteController::class, 'index']);
 Route::get('/routes/{id}', [RouteController::class, 'show']);
 Route::get('/routes/{id}/weather', [RouteController::class, 'weather']);
 
+// Lupa password — 3 langkah OTP (tidak butuh login)
+Route::post('/forgot-password/send-code',   [ForgotPasswordController::class, 'sendCode']);
+Route::post('/forgot-password/verify-code', [ForgotPasswordController::class, 'verifyCode']);
+Route::post('/forgot-password/reset',       [ForgotPasswordController::class, 'resetPassword']);
+
 // ── Protected Routes (perlu Bearer token) ───────────────────────────────
 
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user',    [AuthController::class, 'user']);
+    Route::post('/logout',        [AuthController::class, 'logout']);
+    Route::get('/user',           [AuthController::class, 'user']);
+    Route::put('/user/profile',   [AuthController::class, 'updateProfile']);
+    Route::put('/user/password',  [ChangePasswordController::class, 'update']);
 
     // Transaksi
-    Route::get('/transactions',       [TransactionController::class, 'index']);
-    Route::post('/transactions',      [TransactionController::class, 'store']);
-    Route::get('/transactions/{id}',  [TransactionController::class, 'show']);
+    Route::get('/transactions',          [TransactionController::class, 'index']);
+    Route::post('/transactions',         [TransactionController::class, 'store']);
+    Route::get('/transactions/{id}',     [TransactionController::class, 'show']);
     Route::get('/transactions/{id}/pdf', [TransactionController::class, 'downloadPdf']);
 
     // Validasi Pemesanan Pendaki
     Route::post('/validate-nik', [MemberValidationController::class, 'validateNik']);
 
     // Sesi Hiking
-    Route::get('/hiking-sessions',       [HikingSessionController::class, 'index']);
-    Route::post('/hiking-sessions',      [HikingSessionController::class, 'store']);
-    Route::get('/hiking-sessions/{id}',  [HikingSessionController::class, 'show']);
+    Route::get('/hiking-sessions',      [HikingSessionController::class, 'index']);
+    Route::post('/hiking-sessions',     [HikingSessionController::class, 'store']);
+    Route::get('/hiking-sessions/{id}', [HikingSessionController::class, 'show']);
 });
 
 // ── Webhook Midtrans (WAJIB DAFTAR AUTH-Sanctum/Token) ───────────
@@ -62,6 +71,8 @@ Route::post('/midtrans/callback', [TransactionController::class, 'callback']);
 
 // ── API Admin / Basecamp (Sistem Penjagaan & Scan Tiket) ───────────
 Route::middleware(['auth:sanctum'])->prefix('v1/admin/checkin')->group(function () {
-    Route::get('/scan/{order_id}', [\App\Http\Controllers\Api\Admin\CheckinController::class, 'scan']);
-    Route::put('/status/{order_id}', [\App\Http\Controllers\Api\Admin\CheckinController::class, 'updateStatus']);
+    Route::get('/scan/{order_id}',    [\App\Http\Controllers\Api\Admin\CheckinController::class, 'scan']);
+    Route::put('/status/{order_id}',  [\App\Http\Controllers\Api\Admin\CheckinController::class, 'updateStatus']);
 });
+
+
