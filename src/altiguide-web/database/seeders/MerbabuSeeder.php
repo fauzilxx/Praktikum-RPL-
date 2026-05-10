@@ -36,6 +36,67 @@ class MerbabuSeeder extends Seeder
             ]
         );
 
+         $gpxPath = database_path('data/merbabu-via-suwanting.gpx');
+        if (file_exists($gpxPath)) {
+            $gpx = simplexml_load_file($gpxPath);
+            
+            // Ekstrak garis jalur (track points)
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Potong track hanya dari basecamp (index 0) sampai Puncak (titik tertinggi)
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $suwanting->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            // Pemetaan nama Waypoint di GPX ke nama Waypoint di Database
+            $waypointMap = [
+                'Pos 1' => 'Pos 1 Lembah Lempong',
+                'Puncak Bendera' => 'Pos 2 Bendera',
+                'Sumber' => 'Pos Air Tengah Jalur', // Di GPX namanya 'Sumber'
+                'Pos 3' => 'Pos 3 Dampo Awang',
+                // Puncak Suwanting & Puncak Triangulasi tidak ada titik spesifiknya di GPX ini, tapi ada 'MERBABU SUMMIT'
+                'MERBABU SUMMIT' => 'Puncak Kenteng Songo',
+            ];
+
+            // Update koordinat waypoints
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMap[$gpxName])) {
+                        $dbName = $waypointMap[$gpxName];
+                        $suwanting->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+        }
+
         $suwanting->routeInfo()->updateOrCreate(['route_id' => $suwanting->id],
             [
                 'basecamp_address' => 'Dusun Suwanting, Desa Banyuroto, Kec. Sawangan, Kab. Magelang, Jawa Tengah.',
@@ -208,6 +269,71 @@ class MerbabuSeeder extends Seeder
         }
 
         // ==========================================
+        // PARSE GPX SELO
+        // ==========================================
+        $gpxPathSelo = database_path('data/pendakian-puncak-merbabu-via-selo.gpx');
+        if (file_exists($gpxPathSelo)) {
+            $gpxSelo = simplexml_load_file($gpxPathSelo);
+            
+            // Ekstrak garis jalur (track points)
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpxSelo->trk->trkseg->trkpt)) {
+                foreach ($gpxSelo->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Potong track hanya dari basecamp (index 0) sampai Puncak (titik tertinggi)
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $selo->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            // Pemetaan nama Waypoint di GPX ke nama Waypoint di Database
+            $waypointMapSelo = [
+                'POS 1 Dok Malang' => 'Pos 1 Dok Malang',
+                'Simpang Macan' => 'Simpang Macan',
+                'POS 2 Pandean' => 'Pos 2 Pandean',
+                'POS 3 Batu Tulis' => 'Pos 3 Batu Tulis',
+                'POS 4 Sabana 1' => 'Sabana 1',
+                'POS 5 Sabana 2' => 'Sabana 2',
+                'Puncak Kenteng Songo' => 'Puncak Triangulasi / Kenteng Songo',
+            ];
+
+            // Update koordinat waypoints
+            if (isset($gpxSelo->wpt)) {
+                foreach ($gpxSelo->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapSelo[$gpxName])) {
+                        $dbName = $waypointMapSelo[$gpxName];
+                        $selo->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // ==========================================
         // 3. VIA WEKAS
         // ==========================================
         $wekas = Route::firstOrCreate(
@@ -306,6 +432,69 @@ class MerbabuSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX WEKAS
+        // ==========================================
+        $gpxPathWekas = database_path('data/merbabu-via-wekas-by-alifkurniawan3-gpx.gpx');
+        if (file_exists($gpxPathWekas)) {
+            $gpxWekas = simplexml_load_file($gpxPathWekas);
+            
+            // Ekstrak garis jalur (track points)
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpxWekas->trk->trkseg->trkpt)) {
+                foreach ($gpxWekas->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Potong track hanya dari basecamp (index 0) sampai Puncak (titik tertinggi)
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $wekas->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            // Pemetaan nama Waypoint di GPX ke nama Waypoint di Database
+            $waypointMapWekas = [
+                'Pos 1 - Telaga Arum' => 'Pos 1 Tegal Arum',
+                'Pos 2 Wekas - Camping Ground' => 'Pos 2 Wekas / Kidang Kencana',
+                'Batas Kabupaten' => 'Tugu Perbatasan Kabupaten',
+                'Puncak Syarif' => 'Puncak Syarif & Ondo Rante',
+                'Puncak Kenteng Songo' => 'Puncak Kenteng Songo',
+            ];
+
+            // Update koordinat waypoints
+            if (isset($gpxWekas->wpt)) {
+                foreach ($gpxWekas->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapWekas[$gpxName])) {
+                        $dbName = $waypointMapWekas[$gpxName];
+                        $wekas->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
         }
 
         // ==========================================
@@ -426,6 +615,70 @@ class MerbabuSeeder extends Seeder
         }
 
         // ==========================================
+        // PARSE GPX THEKELAN
+        // ==========================================
+        $gpxPathThekelan = database_path('data/merbabu-via-thekelan.gpx');
+        if (file_exists($gpxPathThekelan)) {
+            $gpxThekelan = simplexml_load_file($gpxPathThekelan);
+            
+            // Ekstrak garis jalur (track points)
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpxThekelan->trk->trkseg->trkpt)) {
+                foreach ($gpxThekelan->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Potong track hanya dari basecamp (index 0) sampai Puncak (titik tertinggi)
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $thekelan->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            // Pemetaan nama Waypoint di GPX ke nama Waypoint di Database
+            $waypointMapThekelan = [
+                'pos 1' => 'Pos 1 Lintas Kebun',
+                'pos 2' => 'Pos 2 Gerbang Cendani',
+                'sabarnak 1' => 'Pos 3 Sabarnak',
+                'Puncak Pemancar' => 'Puncak Pemancar (Puncak 2)',
+                'puncak 3' => 'Puncak Geger Sapi (Puncak 3)',
+                'Puncak Syarif' => 'Puncak Syarif (Puncak 4)',
+            ];
+
+            // Update koordinat waypoints
+            if (isset($gpxThekelan->wpt)) {
+                foreach ($gpxThekelan->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapThekelan[$gpxName])) {
+                        $dbName = $waypointMapThekelan[$gpxName];
+                        $thekelan->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // ==========================================
         // 5. VIA GANCIK
         // ==========================================
         $gancik = Route::firstOrCreate(
@@ -486,11 +739,19 @@ class MerbabuSeeder extends Seeder
                 'has_water_source' => false,
             ],
             [
-                'name' => 'Puncak Triangulasi / Kenteng Songo',
+                'name' => 'Puncak Triangulasi',
                 'altitude' => 3142,
                 'distance_from_prev' => 1.0, 
                 'estimated_time_minutes' => 105, 
-                'description' => 'Summit attack ganas! Curam bebatuan kering. Merbabu di hadapan semesta.',
+                'description' => 'Summit attack yang curam dengan tanjakan bebatuan kering. disini adalah puncak tertinggi merbabu',
+                'has_water_source' => false,
+            ],
+            [
+                'name' => 'Puncak Kenteng Songo',
+                'altitude' => 3139,
+                'distance_from_prev' => 0.5, 
+                'estimated_time_minutes' => 30,     
+                'description' => 'Puncak Kedua Gunung Merbabu',
                 'has_water_source' => false,
             ],
         ];
@@ -500,6 +761,70 @@ class MerbabuSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX GANCIK
+        // ==========================================
+        $gpxPathGancik = database_path('data/merbabu-via-selo-gancik.gpx');
+        if (file_exists($gpxPathGancik)) {
+            $gpxGancik = simplexml_load_file($gpxPathGancik);
+            
+            // Ekstrak garis jalur (track points)
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpxGancik->trk->trkseg->trkpt)) {
+                foreach ($gpxGancik->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Potong track hanya dari basecamp (index 0) sampai Puncak (titik tertinggi)
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $gancik->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            // Pemetaan nama Waypoint di GPX ke nama Waypoint di Database
+            $waypointMapGancik = [
+                'Pos 1 Senduran' => 'Pos 1 Hutan',
+                'Pos 2 Pentor' => 'Pos 2 Merapi View',
+                'Pos 3 Watu Tulis' => 'Pos 3 Join Selo',
+                'Sabana 1' => 'Sabana 1 & 2',
+                'Puncak 3142mdpl' => 'Puncak Triangulasi',
+                'Puncak 3139' => 'Puncak Kenteng Songo'
+            ];
+
+            // Update koordinat waypoints
+            if (isset($gpxGancik->wpt)) {
+                foreach ($gpxGancik->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapGancik[$gpxName])) {
+                        $dbName = $waypointMapGancik[$gpxName];
+                        $gancik->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
         }
 
     }

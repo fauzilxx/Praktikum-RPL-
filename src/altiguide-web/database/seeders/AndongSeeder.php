@@ -95,6 +95,40 @@ class AndongSeeder extends Seeder
             );
         }
 
+        // ==========================================
+        // PARSE GPX PENDEM (BASECAMP - PUNCAK SAJA)
+        // ==========================================
+        $gpxPathPendem = database_path('data/gunung-andong-via-pendem.gpx');
+        if (file_exists($gpxPathPendem)) {
+            $gpxPendem = simplexml_load_file($gpxPathPendem);
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpxPendem->trk->trkseg->trkpt)) {
+                foreach ($gpxPendem->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Potong dari awal sampai puncak saja
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $pendem->update(['track_coordinates' => $trackCoordinates]);
+            }
+        }
+
         // 3. VIA SAWIT
         $sawit = Route::firstOrCreate(
             ['mountain_id' => $andong->id, 'name' => 'Gunung Andong via Sawit'],
@@ -166,6 +200,27 @@ class AndongSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX SAWIT (AWAL - AKHIR)
+        // ==========================================
+        $gpxPathSawit = database_path('data/andong-via-sawit.gpx');
+        if (file_exists($gpxPathSawit)) {
+            $gpxSawit = simplexml_load_file($gpxPathSawit);
+            $trackCoordinates = [];
+
+            if (isset($gpxSawit->trk->trkseg->trkpt)) {
+                foreach ($gpxSawit->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+
+                // Ambil semua dari awal sampai akhir
+                $sawit->update(['track_coordinates' => $trackCoordinates]);
+            }
         }
 
         // 4. VIA GOGIK

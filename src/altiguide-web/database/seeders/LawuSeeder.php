@@ -127,6 +127,53 @@ class LawuSeeder extends Seeder
             );
         }
 
+        // ==========================================
+        // PARSE GPX CANDI CETHO
+        // ==========================================
+        $gpxPathCetho = database_path('data/gunung-lawu-via-candi-cetho-karanganyar-jawa-tengah-agustus-.gpx');
+        if (file_exists($gpxPathCetho)) {
+            $gpx = simplexml_load_file($gpxPathCetho);
+            
+            $trackCoordinates = [];
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                $candiCetho->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapCetho = [
+                'POS 1 MBAH BRANTI' => 'Pos 1 Mbah Branti',
+                'POS 2 BRAKSENG' => 'Pos 2 Brakseng',
+                'POS 3 CEMORO DOWO' => 'Pos 3 CemoroDowo',
+                'POS 4 PENGGIK' => 'Pos 4 Penggik',
+                'POS 5 BULAK PEPERANGAN' => 'Pos 5 Bulak Peperangan',
+                'GUPAKAN MENJANGAN' => 'Gupak Menjangan',
+                'PASAR DIENG' => 'Pasar Dieng',
+                'HARGO DALEM' => 'Hargo Dalem',
+                'PUNCAK HARGO DUMILAH' => 'Puncak Hargo Dumillah',
+            ];
+
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapCetho[$gpxName])) {
+                        $dbName = $waypointMapCetho[$gpxName];
+                        $candiCetho->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+        }
+
         $cemoroKandang = Route::firstOrCreate(
             ['mountain_id' => $lawu->id, 'name' => 'Gunung Lawu via Cemoro Kandang'],
             [
@@ -211,6 +258,49 @@ class LawuSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX CEMORO KANDANG
+        // ==========================================
+        $gpxPathKandang = database_path('data/lawu-via-cemoro-kandang.gpx');
+        if (file_exists($gpxPathKandang)) {
+            $gpx = simplexml_load_file($gpxPathKandang);
+            
+            $trackCoordinates = [];
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                $cemoroKandang->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapKandang = [
+                'pos 1 tamansari bawah' => 'Pos 1 Taman Sari Bawah',
+                'pos 2 tamansari atas' => 'Pos 2 Taman Sari Atas',
+                'pos 3 penggik' => 'Pos 3 Penggik / Ompak-ompakan',
+                'pos 4 cokro suryo (warung pak bet)' => 'Pos 4 Cokro Suryo / Ondho Rante',
+                'puncak hargo dumilah' => 'Puncak Hargo Dumillah',
+            ];
+
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapKandang[$gpxName])) {
+                        $dbName = $waypointMapKandang[$gpxName];
+                        $cemoroKandang->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
         }
 
          $cemoroSewu = Route::firstOrCreate(
@@ -300,6 +390,67 @@ class LawuSeeder extends Seeder
             );
         }
 
+        // ==========================================
+        // PARSE GPX CEMORO SEWU
+        // ==========================================
+        $gpxPathSewu = database_path('data/mount-lawu-via-cemoro-sewu.gpx');
+        if (file_exists($gpxPathSewu)) {
+            $gpx = simplexml_load_file($gpxPathSewu);
+            
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Sesuai instruksi: Ambil dari basecamp sampai Hargo Dumilah (puncak)
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $cemoroSewu->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapSewu = [
+                'POS1' => 'Pos 1 Wes-wesan',
+                'POS 2 WATU GEDHEG' => 'Pos 2 Watu Kethek',
+                'POS 3' => 'Pos 3 Watu Lumbung',
+                'POS 4 WATU KAPUR' => 'Pos 4 Watu Kapur',
+                'SENDANG DRAJAT' => 'Pos 5 Sendang Drajat',
+                'MBOK YEM' => 'Hargo Dalem',
+                'PUNCAK HARGO DUMILAH' => 'Puncak Hargo Dumillah',
+            ];
+
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapSewu[$gpxName])) {
+                        $dbName = $waypointMapSewu[$gpxName];
+                        $cemoroSewu->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+        }
+
         $singolangu = Route::firstOrCreate(
             ['mountain_id' => $lawu->id, 'name' => 'Gunung Lawu via Singolangu'],
             [
@@ -385,6 +536,67 @@ class LawuSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX SINGOLANGU
+        // ==========================================
+        $gpxPathSingolangu = database_path('data/mount-lawu-via-singolangu.gpx');
+        if (file_exists($gpxPathSingolangu)) {
+            $gpx = simplexml_load_file($gpxPathSingolangu);
+            
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Sesuai instruksi: Ambil dari basecamp sampai Hargo Dumilah (puncak)
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $singolangu->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapSingolangu = [
+                'kerun kerun' => 'Pos 1 Kerun-kerun / Ompak-ompakan',
+                'banyu urip' => 'Pos 2 Banyu Urip',
+                'hutan cemara' => 'Pos 3 Cemoro Tukul / Hutan Cemara',
+                'taman edelweiss' => 'Pos 4 Taman Edelweis / Taman Suwidak',
+                'cokro paningalan' => 'Pos 5 Cokro Paningalan / Cokro Suryo',
+                'sendang derajat' => 'Hargo Dalem / Sendang Drajat',
+                'hargo dalem' => 'Hargo Dalem / Sendang Drajat',
+            ];
+
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapSingolangu[$gpxName])) {
+                        $dbName = $waypointMapSingolangu[$gpxName];
+                        $singolangu->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
         }
     }
 }

@@ -88,6 +88,36 @@ class SumbingSeeder extends Seeder
             );
         }
 
+        // PARSE GPX GARUNG
+        $gpxPathGarung = database_path('data/pendakian-puncak-sumbing-via-garung.gpx');
+        if (file_exists($gpxPathGarung)) {
+            $gpxGarung = simplexml_load_file($gpxPathGarung);
+            $trackGarung = [];
+            if (isset($gpxGarung->trk->trkseg->trkpt)) {
+                foreach ($gpxGarung->trk->trkseg->trkpt as $pt) {
+                    $trackGarung[] = [(float) $pt['lat'], (float) $pt['lon']];
+                }
+                $garung->update(['track_coordinates' => $trackGarung]);
+            }
+            $wptMapGarung = [
+                'POS 1 Malim' => 'Pos 1 Malim',
+                'POS 2 Baon' => 'Pos 2 Baon',
+                'POS 3 Sebogo' => 'Pos 3 Sebogo',
+                'Puncak Kekawah' => 'Puncak Kekawah',
+            ];
+            if (isset($gpxGarung->wpt)) {
+                foreach ($gpxGarung->wpt as $wpt) {
+                    $name = (string) $wpt->name;
+                    if (isset($wptMapGarung[$name])) {
+                        $garung->waypoints()->where('name', $wptMapGarung[$name])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
+        }
+
         // 2. VIA BANARAN
         $banaran = Route::firstOrCreate(
             ['mountain_id' => $sumbing->id, 'name' => 'Gunung Sumbing via Banaran'],
@@ -171,6 +201,38 @@ class SumbingSeeder extends Seeder
             );
         }
 
+        // PARSE GPX BANARAN
+        $gpxPathBanaran = database_path('data/gunung-sumbing-via-banaran-temanggung-jawa-tengah.gpx');
+        if (file_exists($gpxPathBanaran)) {
+            $gpxBanaran = simplexml_load_file($gpxPathBanaran);
+            $trackBanaran = [];
+            if (isset($gpxBanaran->trk->trkseg->trkpt)) {
+                foreach ($gpxBanaran->trk->trkseg->trkpt as $pt) {
+                    $trackBanaran[] = [(float) $pt['lat'], (float) $pt['lon']];
+                }
+                $banaran->update(['track_coordinates' => $trackBanaran]);
+            }
+            $wptMapBanaran = [
+                'POS 1 SEKLENTENG' => 'Pos 1 Seklenteng',
+                'POS 2 SIWEL-IWEL' => 'Pos 2 Siwel-iwel',
+                'POS 3 PUNTHUK BARAH' => 'Pos 3 Punthuk Barah',
+                'POS 4 WATU ONDHO' => 'Pos 4 Watu Ondho',
+                'SEGORO BANJARAN' => 'Segara Banjaran',
+                'PUNCAK RAJAWALI' => 'Puncak Rajawali',
+            ];
+            if (isset($gpxBanaran->wpt)) {
+                foreach ($gpxBanaran->wpt as $wpt) {
+                    $name = (string) $wpt->name;
+                    if (isset($wptMapBanaran[$name])) {
+                        $banaran->waypoints()->where('name', $wptMapBanaran[$name])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
+        }
+
         // 3. VIA BOWONGSO
         $bowongso = Route::firstOrCreate(
             ['mountain_id' => $sumbing->id, 'name' => 'Gunung Sumbing via Bowongso'],
@@ -244,6 +306,37 @@ class SumbingSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // PARSE GPX BOWONGSO
+        $gpxPathBowongso = database_path('data/sumbing-via-bowongso-created-by-alifkurniawan3-gpx.gpx');
+        if (file_exists($gpxPathBowongso)) {
+            $gpxBowongso = simplexml_load_file($gpxPathBowongso);
+            $trackBowongso = [];
+            if (isset($gpxBowongso->trk->trkseg->trkpt)) {
+                foreach ($gpxBowongso->trk->trkseg->trkpt as $pt) {
+                    $trackBowongso[] = [(float) $pt['lat'], (float) $pt['lon']];
+                }
+                $bowongso->update(['track_coordinates' => $trackBowongso]);
+            }
+            $wptMapBowongso = [
+                'Pos 1 - Taman Asmara' => 'Gardu Pandang & Pos 1 Taman Asmara',
+                'Pos 2 - Pos Bogel' => 'Pos 2 Bogel',
+                'Camp Gajahan' => 'Camp Gajahan',
+                'Pos 3 - Zorro' => 'Pos 3 Zoro',
+                'Puncak Rajawali' => 'Puncak Bayangan & Puncak Rajawali',
+            ];
+            if (isset($gpxBowongso->wpt)) {
+                foreach ($gpxBowongso->wpt as $wpt) {
+                    $name = (string) $wpt->name;
+                    if (isset($wptMapBowongso[$name])) {
+                        $bowongso->waypoints()->where('name', $wptMapBowongso[$name])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
         }
 
         // 4. VIA KALIANGKRIK (NEPAL VAN JAVA)
@@ -321,6 +414,19 @@ class SumbingSeeder extends Seeder
             );
         }
 
+        // PARSE GPX KALIANGKRIK
+        $gpxPathKaliangkrik = database_path('data/sumbing-kaliangkrik.gpx');
+        if (file_exists($gpxPathKaliangkrik)) {
+            $gpxKaliangkrik = simplexml_load_file($gpxPathKaliangkrik);
+            $trackKaliangkrik = [];
+            if (isset($gpxKaliangkrik->trk->trkseg->trkpt)) {
+                foreach ($gpxKaliangkrik->trk->trkseg->trkpt as $pt) {
+                    $trackKaliangkrik[] = [(float) $pt['lat'], (float) $pt['lon']];
+                }
+                $kaliangkrik->update(['track_coordinates' => $trackKaliangkrik]);
+            }
+        }
+
         // 5. VIA BATURSARI (AZORA)
         $batursari = Route::firstOrCreate(
             ['mountain_id' => $sumbing->id, 'name' => 'Gunung Sumbing via Batursari (Azora)'],
@@ -394,6 +500,187 @@ class SumbingSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // PARSE GPX BATURSARI
+        $gpxPathBatursari = database_path('data/sumbing-batursari.gpx');
+        if (file_exists($gpxPathBatursari)) {
+            $gpxBatursari = simplexml_load_file($gpxPathBatursari);
+            $trackBatursari = [];
+            if (isset($gpxBatursari->trk->trkseg->trkpt)) {
+                foreach ($gpxBatursari->trk->trkseg->trkpt as $pt) {
+                    $trackBatursari[] = [(float) $pt['lat'], (float) $pt['lon']];
+                }
+                $batursari->update(['track_coordinates' => $trackBatursari]);
+            }
+            $wptMapBatursari = [
+                'pos 1' => 'Pos 1 Siroto',
+                'pos 2' => 'Pos 2 Bidoblang',
+                'pos 4' => 'Pos 4',
+                'puncak batu singa' => 'Puncak Watu Singa (Menuju Rajawali)',
+            ];
+            if (isset($gpxBatursari->wpt)) {
+                foreach ($gpxBatursari->wpt as $wpt) {
+                    $name = (string) $wpt->name;
+                    if (isset($wptMapBatursari[$name])) {
+                        $batursari->waypoints()->where('name', $wptMapBatursari[$name])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
+        }
+
+        $gajahMungkur = Route::firstOrCreate(
+            ['mountain_id' => $sumbing->id, 'name' => 'Gunung Sumbing via Gajah Mungkur'],
+            [
+                'distance' => 7.2, 
+                'estimated_time' => 495, // Total pendakian ± 8 jam 15 menit
+                'difficulty' => 'hard', // Karena tanjakan ekstrem di akhir dan medan terbuka
+                'is_active' => true,
+                'latitude' => -7.3917, 
+                'longitude' => 110.0236
+            ]
+        );
+
+        $gajahMungkur->routeInfo()->updateOrCreate(['route_id' => $gajahMungkur->id],
+            [
+                'basecamp_address' => 'Desa Lamuk, Kecamatan Kalikajar, Kabupaten Wonosobo, Jawa Tengah.',
+                'basecamp_altitude' => 1300,
+                'simaksi_price' => 30000,
+                'ojek_price' => 30000,
+                'ojek_description' => 'Basecamp – Gapuro Rahayu (Rp 30.000).',
+                'facilities_description' => 'Basecamp dikelola oleh Pemuda Mandiri Gajah Mungkur dengan fasilitas lengkap (parkir, toilet, tempat istirahat). Akses menuju pintu rimba sangat terbantu dengan adanya jasa ojek untuk melewati jalan berbatu di tengah perkebunan warga.',
+                'logistics_description' => 'Dikenal sebagai "The Savanna of Mount Sumbing" karena 70% jalur merupakan padang rumput terbuka. Sumber air tersedia di cekungan tebing dekat area Camp Kandang Kidang (sebelum Pos 4). Sangat disarankan membawa perlindungan matahari ekstra karena minimnya tajuk pohon.',
+            ]
+        );
+
+        $waypointsGajahMungkur = [
+            [
+                'name' => 'Gapuro Rahayu',
+                'altitude' => 1600,
+                'distance_from_prev' => 3.0, 
+                'estimated_time_minutes' => 120, 
+                'description' => 'Pintu rimba sekaligus batas akhir kebun penduduk. Jika menggunakan ojek, perjalanan hanya memakan waktu 20 menit melewati jalan batu tertata.',
+                'has_water_source' => false,
+            ],
+            [
+                'name' => 'Pos 1 Sengaran',
+                'altitude' => 1950,
+                'distance_from_prev' => 1.2, 
+                'estimated_time_minutes' => 60, 
+                'description' => 'Melewati titik ikonik "Tataran Mbujet". Medan didominasi tanah padat dengan penahan kayu di beberapa bagian tanjakan.',
+                'has_water_source' => false,
+            ],
+            [
+                'name' => 'Pos 2 Kazu Sawa',
+                'altitude' => 2300,
+                'distance_from_prev' => 0.8, 
+                'estimated_time_minutes' => 60, 
+                'description' => 'Jalur mulai konsisten menanjak. Nama lokasi diambil dari jenis pohon lokal. Terdapat area cukup datar untuk istirahat sejenak.',
+                'has_water_source' => false,
+            ],
+            [
+                'name' => 'Pos 3 Gajah Mungkur',
+                'altitude' => 2650,
+                'distance_from_prev' => 1.0, 
+                'estimated_time_minutes' => 90, 
+                'description' => 'Titik awal vegetasi terbuka. Pemandangan mulai terlihat luas tanpa halangan pohon besar. Melewati area Camp Watu Talang sebelum sampai di pos ini.',
+                'has_water_source' => false,
+            ],
+            [
+                'name' => 'Camp Kandang Kidang',
+                'altitude' => 2900,
+                'distance_from_prev' => 0.7, 
+                'estimated_time_minutes' => 60, 
+                'description' => 'Area camping utama yang sangat luas. Dekat dengan lokasi sumber air musiman di cekungan tebing bawah jalur.',
+                'has_water_source' => true,
+            ],
+            [
+                'name' => 'Pos 4 Gelar Wangi',
+                'altitude' => 3200,
+                'distance_from_prev' => 0.6, 
+                'estimated_time_minutes' => 90, 
+                'description' => 'Tanjakan ekstrem melewati padang edelweiss. Jalur berupa tanah dan batuan lepas yang dipasang tali bantuan (webbing) karena kemiringannya.',
+                'has_water_source' => false,
+            ],
+            [
+                'name' => 'Puncak Rajawali',
+                'altitude' => 3371,
+                'distance_from_prev' => 0.2, 
+                'estimated_time_minutes' => 15, 
+                'description' => 'Titik tertinggi Gunung Sumbing. Area puncak cukup sempit dengan pemandangan langsung ke arah kawah aktif dan Gunung Sindoro.',
+                'has_water_source' => false,
+            ],
+        ];
+
+        foreach ($waypointsGajahMungkur as $index => $wp) {
+            $gajahMungkur->waypoints()->updateOrCreate(
+                ['name' => $wp['name']],
+                array_merge($wp, ['order_index' => $index + 1])
+            );
+        }
+
+        // ==========================================
+        // PARSE GPX GAJAH MUNGKUR
+        // ==========================================
+        $gpxPathMain = database_path('data/pendakian-gn-sumbing-via-gajah-mungkur.gpx');
+        $gpxPathAlt = database_path('data/sumbing-via-gajah-mungkur.gpx');
+        
+        if (file_exists($gpxPathMain)) {
+            $gpxMain = simplexml_load_file($gpxPathMain);
+            $trackCoordinates = [];
+
+            if (isset($gpxMain->trk->trkseg->trkpt)) {
+                foreach ($gpxMain->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                $gajahMungkur->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapMain = [
+                'pos 3 gajah mungkur' => 'Pos 3 Gajah Mungkur',
+                'Camp kandang kidang' => 'Camp Kandang Kidang',
+                'Pos 4 edelweis park' => 'Pos 4 Gelar Wangi',
+                'Puncak rajawali' => 'Puncak Rajawali',
+            ];
+
+            if (isset($gpxMain->wpt)) {
+                foreach ($gpxMain->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    if (isset($waypointMapMain[$gpxName])) {
+                        $gajahMungkur->waypoints()->where('name', $waypointMapMain[$gpxName])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
+        }
+
+        if (file_exists($gpxPathAlt)) {
+            $gpxAlt = simplexml_load_file($gpxPathAlt);
+            
+            $waypointMapAlt = [
+                'Gapura rahayu' => 'Gapuro Rahayu',
+                'Pos 1' => 'Pos 1 Sengaran',
+            ];
+
+            if (isset($gpxAlt->wpt)) {
+                foreach ($gpxAlt->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    if (isset($waypointMapAlt[$gpxName])) {
+                        $gajahMungkur->waypoints()->where('name', $waypointMapAlt[$gpxName])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
         }
 
     }

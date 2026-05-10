@@ -107,6 +107,45 @@ class SindoroSeeder extends Seeder
         }
 
         // ==========================================
+        // PARSE GPX KLEDUNG
+        // ==========================================
+        $gpxPathKledung = database_path('data/mt-sindoro-kledung-route.gpx');
+        if (file_exists($gpxPathKledung)) {
+            $gpxKledung = simplexml_load_file($gpxPathKledung);
+            $trackCoordinates = [];
+
+            if (isset($gpxKledung->trk->trkseg->trkpt)) {
+                foreach ($gpxKledung->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                $kledung->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapKledung = [
+                'Post 2' => 'Pos 2 Cawang',
+                'Post 3' => 'Pos 3 Seroto / Pestoroto',
+                'SUNRISE CAMP' => 'Sunrise Camp',
+                'Post 4 Watu tatah' => 'Pos 4 Watu Tatah',
+                'Latar ombo peak' => 'Puncak Latar Ombo',
+            ];
+
+            if (isset($gpxKledung->wpt)) {
+                foreach ($gpxKledung->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    if (isset($waypointMapKledung[$gpxName])) {
+                        $kledung->waypoints()->where('name', $waypointMapKledung[$gpxName])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // ==========================================
         // 2. VIA ALANG-ALANG SEWU (PAJERO)
         // ==========================================
         $alang = Route::firstOrCreate(
@@ -181,6 +220,45 @@ class SindoroSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX ALANG-ALANG SEWU
+        // ==========================================
+        $gpxPathAlang = database_path('data/sindoro-via-alang-alang-sewu.gpx');
+        if (file_exists($gpxPathAlang)) {
+            $gpxAlang = simplexml_load_file($gpxPathAlang);
+            $trackCoordinates = [];
+
+            if (isset($gpxAlang->trk->trkseg->trkpt)) {
+                foreach ($gpxAlang->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                $alang->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapAlang = [
+                'POS 1' => 'Pos 1 Lembah Kesunyian',
+                'Pos 2' => 'Pos 2 Lembah Katresnan',
+                'Pos 3' => 'Pos 3 Sunrise Hunter',
+                'Pos 4' => 'Pos 4 Jalu Mulyo',
+                'Puncak Gunung Sindoro' => 'Puncak Sindoro',
+            ];
+
+            if (isset($gpxAlang->wpt)) {
+                foreach ($gpxAlang->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    if (isset($waypointMapAlang[$gpxName])) {
+                        $alang->waypoints()->where('name', $waypointMapAlang[$gpxName])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
         }
 
         // ==========================================
@@ -274,6 +352,40 @@ class SindoroSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX BANSARI (POTONG BASECAMP - PUNCAK)
+        // ==========================================
+        $gpxPathBansari = database_path('data/sindoro-bansari-sigandul.gpx');
+        if (file_exists($gpxPathBansari)) {
+            $gpxBansari = simplexml_load_file($gpxPathBansari);
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpxBansari->trk->trkseg->trkpt)) {
+                foreach ($gpxBansari->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                    $currentIndex++;
+                }
+
+                // Potong dari awal sampai puncak saja
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+
+                $bansari->update(['track_coordinates' => $trackCoordinates]);
+            }
         }
 
         // ==========================================
@@ -444,6 +556,44 @@ class SindoroSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX NDORO ARUM
+        // ==========================================
+        $gpxPathNdoroArum = database_path('data/sindoro-via-ndoro-arum.gpx');
+        if (file_exists($gpxPathNdoroArum)) {
+            $gpxNdoroArum = simplexml_load_file($gpxPathNdoroArum);
+            $trackCoordinates = [];
+
+            if (isset($gpxNdoroArum->trk->trkseg->trkpt)) {
+                foreach ($gpxNdoroArum->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [
+                        (float) $pt['lat'],
+                        (float) $pt['lon']
+                    ];
+                }
+                $ndoroArum->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapNdoroArum = [
+                'Pos 2 kayu sawa' => 'Pos 2 Kayu Sawa',
+                'Pos 3 Watu Putih' => 'Pos 3 Watu Putih',
+                'Pos 4 uci-uci' => 'Pos 4 Uci-uci',
+                'Puncak ndoro arum' => 'Puncak Sindoro (Via Ndoro Arum)',
+            ];
+
+            if (isset($gpxNdoroArum->wpt)) {
+                foreach ($gpxNdoroArum->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    if (isset($waypointMapNdoroArum[$gpxName])) {
+                        $ndoroArum->waypoints()->where('name', $waypointMapNdoroArum[$gpxName])->update([
+                            'latitude' => (float) $wpt['lat'],
+                            'longitude' => (float) $wpt['lon']
+                        ]);
+                    }
+                }
+            }
         }
 
     }

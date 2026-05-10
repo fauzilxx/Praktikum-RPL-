@@ -91,6 +91,45 @@ class PrauSeeder extends Seeder
         }
 
         // ==========================================
+        // PARSE GPX DIENG
+        // ==========================================
+        $gpxPathDieng = database_path('data/prau-mountain-via-dieng.gpx');
+        if (file_exists($gpxPathDieng)) {
+            $gpx = simplexml_load_file($gpxPathDieng);
+            
+            $trackCoordinates = [];
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [(float) $pt['lat'], (float) $pt['lon']];
+                }
+                $dieng->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapDieng = [
+                'POS 1' => 'Pos 1 Gemekan',
+                'POS 2' => 'Pos 2 Semendung',
+                'POS 3' => 'Pos 3 Ranger (Ngencling)',
+                'Puncak Prau 2590 MDPL' => 'Puncak Gunung Prau & Telaga Wurung',
+            ];
+
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapDieng[$gpxName])) {
+                        $dbName = $waypointMapDieng[$gpxName];
+                        $dieng->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // ==========================================
         // 2. VIA PATAK BANTENG
         // ==========================================
         $patakBanteng = Route::firstOrCreate(
@@ -157,6 +196,65 @@ class PrauSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX PATAK BANTENG
+        // ==========================================
+        $gpxPathPatakBanteng = database_path('data/prau-via-patakbanteng.gpx');
+        if (file_exists($gpxPathPatakBanteng)) {
+            $gpx = simplexml_load_file($gpxPathPatakBanteng);
+            
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakCoord = null;
+
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    $lat = (float) $pt['lat'];
+                    $lon = (float) $pt['lon'];
+                    
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakCoord = [$lat, $lon];
+                    }
+
+                    $trackCoordinates[] = [$lat, $lon];
+                }
+                $patakBanteng->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            // Map waypoints
+            $waypointMapPatakBanteng = [
+                'POS 1' => 'Pos 1 Sikut Dewo',
+                'POS 2' => 'Pos 2 Canggal Walang',
+                'POS 3 CACINGAN' => 'Pos 3 Cacingan',
+            ];
+
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapPatakBanteng[$gpxName])) {
+                        $dbName = $waypointMapPatakBanteng[$gpxName];
+                        $patakBanteng->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+
+            // Set Puncak to highest elevation coordinate
+            if ($peakCoord) {
+                $patakBanteng->waypoints()->where('name', 'Plawangan & Sunrise Camp (Puncak Prau)')->update([
+                    'latitude' => $peakCoord[0],
+                    'longitude' => $peakCoord[1]
+                ]);
+            }
         }
 
         // ==========================================
@@ -229,6 +327,23 @@ class PrauSeeder extends Seeder
         }
 
         // ==========================================
+        // PARSE GPX KALILEMBU
+        // ==========================================
+        $gpxPathKalilembu = database_path('data/puncak-gunung-prau-via-kalilembu.gpx');
+        if (file_exists($gpxPathKalilembu)) {
+            $gpx = simplexml_load_file($gpxPathKalilembu);
+            
+            $trackCoordinates = [];
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $trackCoordinates[] = [(float) $pt['lat'], (float) $pt['lon']];
+                }
+                $kalilembu->update(['track_coordinates' => $trackCoordinates]);
+            }
+            // No wpt mapping for Kalilembu
+        }
+
+        // ==========================================
         // 4. VIA DWARAWATI
         // ==========================================
         $dwarawati = Route::firstOrCreate(
@@ -298,6 +413,56 @@ class PrauSeeder extends Seeder
         }
 
         // ==========================================
+        // PARSE GPX DWARAWATI
+        // ==========================================
+        $gpxPathDwarawati = database_path('data/gunung-prau-via-dwarawati.gpx');
+        if (file_exists($gpxPathDwarawati)) {
+            $gpx = simplexml_load_file($gpxPathDwarawati);
+            
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakIndex = -1;
+            $currentIndex = 0;
+
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakIndex = $currentIndex;
+                    }
+                    $trackCoordinates[] = [(float) $pt['lat'], (float) $pt['lon']];
+                    $currentIndex++;
+                }
+
+                if ($peakIndex > 0) {
+                    $trackCoordinates = array_slice($trackCoordinates, 0, $peakIndex + 1);
+                }
+                $dwarawati->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $waypointMapDwarawati = [
+                'Puncak Prau' => 'Puncak Sabana',
+            ];
+
+            if (isset($gpx->wpt)) {
+                foreach ($gpx->wpt as $wpt) {
+                    $gpxName = (string) $wpt->name;
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if (isset($waypointMapDwarawati[$gpxName])) {
+                        $dbName = $waypointMapDwarawati[$gpxName];
+                        $dwarawati->waypoints()->where('name', $dbName)->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // ==========================================
         // 5. VIA WATES
         // ==========================================
         $wates = Route::firstOrCreate(
@@ -326,7 +491,7 @@ class PrauSeeder extends Seeder
 
         $waypointsWates = [
             [
-                'name' => 'Pos 1 Blumbang Kodok',
+                'name' => 'Pintu Rimba',
                 'altitude' => 1900,
                 'distance_from_prev' => null, 
                 'estimated_time_minutes' => 60, 
@@ -350,11 +515,27 @@ class PrauSeeder extends Seeder
                 'has_water_source' => true,
             ],
             [
-                'name' => 'Camp Pelawangan & Sunrise Camp (Via Rangkaian Bukit)',
+                'name' => 'Tangga Cinta',
+                'altitude' => 2400,
+                'distance_from_prev' => null, 
+                'estimated_time_minutes' => 30, 
+                'description' => 'Tanjakan ekstrem berupa tangga tanah berundak yang menguji kesabaran dan fisik. Sering dijuluki tangga cinta karena butuh perjuangan berat untuk melewatinya sebelum sampai ke batas hutan terbuka.',
+                'has_water_source' => false,
+            ],
+            [
+                'name' => 'Bukit Ridnu',
+                'altitude' => 2500,
+                'distance_from_prev' => null, 
+                'estimated_time_minutes' => 30, 
+                'description' => 'Bukit luas dengan sabana yang indah, cocok untuk istirahat sejenak sambil menikmati pemandangan perbukitan Temanggung.',
+                'has_water_source' => false,
+            ],
+            [
+                'name' => 'Camp Pelawangan & Sunrise Camp (Puncak)',
                 'altitude' => 2565,
                 'distance_from_prev' => null, 
-                'estimated_time_minutes' => 90, 
-                'description' => 'Rute atas Wates ini sungguh estetik. Keluar dari rimba, pendaki disuguhkan tanah lapang bertingkat yang sambung-menyambung. Mulai dari Bukit Rindu, Camp Pelawangan, dan Cemoro Tunggal, kesemuanya adalah lahan camp alternatif bertabur sabana. Pendaki cukup memilih titik kumpul kemah paling akhir sebelum berjalan sebentar menuju mahkota tertinggi Gunung Prau.',
+                'estimated_time_minutes' => 30, 
+                'description' => 'Rute atas Wates ini sungguh estetik. Keluar dari rimba, pendaki disuguhkan tanah lapang bertingkat yang sambung-menyambung. Mulai dari Bukit Ridnu, Camp Pelawangan, dan Cemoro Tunggal, kesemuanya adalah lahan camp alternatif bertabur sabana. Pendaki cukup memilih titik kumpul kemah paling akhir sebelum berjalan sebentar menuju mahkota tertinggi Gunung Prau.',
                 'has_water_source' => false,
             ],
         ];
@@ -364,6 +545,65 @@ class PrauSeeder extends Seeder
                 ['name' => $wp['name']],
                 array_merge($wp, ['order_index' => $index + 1])
             );
+        }
+
+        // ==========================================
+        // PARSE GPX WATES
+        // ==========================================
+        $gpxPathWates = database_path('data/mount-prau-via-wates.gpx');
+        if (file_exists($gpxPathWates)) {
+            $gpx = simplexml_load_file($gpxPathWates);
+            
+            $trackCoordinates = [];
+            $maxEle = -1;
+            $peakCoord = null;
+
+            if (isset($gpx->trk->trkseg->trkpt)) {
+                foreach ($gpx->trk->trkseg->trkpt as $pt) {
+                    $ele = (float) $pt->ele;
+                    $lat = (float) $pt['lat'];
+                    $lon = (float) $pt['lon'];
+
+                    if ($ele > $maxEle) {
+                        $maxEle = $ele;
+                        $peakCoord = [$lat, $lon];
+                    }
+                    $trackCoordinates[] = [$lat, $lon];
+                }
+                $wates->update(['track_coordinates' => $trackCoordinates]);
+            }
+
+            $watesWptKeys = [
+                'Pintu Rimba',
+                'Pos 2 Cemaran',
+                'Pos 3 Sudung Dewo',
+                'Tangga Cinta',
+                'Bukit Ridnu'
+            ];
+
+            if (isset($gpx->wpt)) {
+                $i = 0;
+                foreach ($gpx->wpt as $wpt) {
+                    $lat = (float) $wpt['lat'];
+                    $lon = (float) $wpt['lon'];
+
+                    if ($i < count($watesWptKeys)) {
+                        $wates->waypoints()->where('name', $watesWptKeys[$i])->update([
+                            'latitude' => $lat,
+                            'longitude' => $lon
+                        ]);
+                    }
+                    $i++;
+                }
+            }
+
+            // Set Puncak to highest elevation coordinate
+            if ($peakCoord) {
+                $wates->waypoints()->where('name', 'Camp Pelawangan & Sunrise Camp (Puncak)')->update([
+                    'latitude' => $peakCoord[0],
+                    'longitude' => $peakCoord[1]
+                ]);
+            }
         }
 
         // ==========================================
