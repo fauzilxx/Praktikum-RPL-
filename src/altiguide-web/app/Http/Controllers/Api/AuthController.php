@@ -88,4 +88,26 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
+
+    /**
+     * Update profil user (dari mobile app).
+     * Semua field bersifat optional (partial update).
+     */
+    public function updateProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'name'              => ['sometimes', 'string', 'max:100'],
+            'phone_number'      => ['sometimes', 'string', 'max:15'],
+            'age'               => ['sometimes', 'integer', 'min:1', 'max:120'],
+            'address'           => ['sometimes', 'string'],
+            'emergency_contact' => ['sometimes', 'string', 'max:15'],
+        ]);
+
+        $request->user()->update($validated);
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui.',
+            'user'    => $request->user()->fresh(),
+        ]);
+    }
 }
