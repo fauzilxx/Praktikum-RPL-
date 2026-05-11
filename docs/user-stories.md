@@ -1,83 +1,63 @@
-# User Stories & Acceptance Criteria: AltiGuide
+# Peran Pengguna & User Story: AltiGuide (Revised)
 
 ## 1. Peran Pengguna (User Roles)
-* **Hiker (User App):** Pengguna aplikasi mobile untuk kebutuhan pendakian.
-* **Superadmin (Admin CMS):** Pengelola data master (Gunung, Rute, User) dan infrastruktur data navigasi.
-* **Basecamp Staff (Admin CMS):** Petugas lapangan untuk verifikasi tiket dan pemantauan jalur lokal.
+* **Pendaki (Hiker):** Pengguna aplikasi (Mobile/Web) yang melakukan pendaftaran, pembayaran, dan navigasi.
+* **Superadmin:** Pihak yang mengelola data master (Gunung, Rute, User) melalui CMS.
+* **Basecamp Staff:** Petugas lapangan yang melakukan verifikasi tiket pendaki (*Check-in*) dan memantau rute lokal.
 
 ---
 
-## 2. User Story & Acceptance Criteria (Hiker - Mobile App)
+## 2. User Story & Acceptance Criteria
 
-### US-01: Autentikasi Pengguna
-**Sebagai** Hiker,  
-**Saya ingin** melakukan registrasi dan login dengan sistem OTP email,  
-**Agar** akun saya terverifikasi dengan aman.
+### US-01: Pengajuan Simaksi Daring (Hiker)
+**Sebagai** Pendaki, **saya ingin** mengajukan Simaksi secara daring, **agar** saya bisa mendapatkan izin mendaki dengan lebih efisien.
 
-* **AC-1 (Normal):** Sistem mengirimkan 6 digit kode OTP ke email yang didaftarkan secara real-time.
-* **AC-2 (Error - Invalid OTP):** Jika kode OTP yang dimasukkan salah, sistem menampilkan pesan "Kode OTP tidak valid" dan memberikan kesempatan hingga 3 kali percobaan sebelum memblokir input selama 5 menit.
-* **AC-3 (Error - Expired OTP):** Jika OTP dimasukkan setelah melewati batas waktu 5 menit, sistem menampilkan pesan "Kode OTP kadaluwarsa" dan menyediakan tombol "Kirim Ulang".
-* **AC-4 (Validation):** Sistem menolak pendaftaran jika format email tidak sesuai standar (misal: tanpa @) atau email sudah terdaftar di database.
+* **AC-1 (Normal):** Sistem menyediakan formulir data diri, jadwal, dan unggahan identitas.
+* **AC-2 (Include):** Pengguna wajib mengisi data seluruh anggota rombongan (Validasi NIK) sebelum lanjut ke pembayaran.
+* **AC-3 (Error - Validasi):** Jika kolom wajib kosong atau NIK tidak berjumlah 16 digit, muncul pesan error "Format data tidak valid".
+* **AC-4 (Error - Format File):** Jika file dokumen >2MB atau bukan format PDF/JPG, sistem menolak unggahan.
 
-### US-02: Pemesanan SIMAKSI & Pembayaran
-**Sebagai** Hiker,  
-**Saya ingin** melakukan pemesanan SIMAKSI dan membayar secara daring,  
-**Agar** saya mendapatkan izin pendakian tanpa antre di lokasi.
+### US-02: Verifikasi & E-Ticket (Admin/Staff)
+**Sebagai** Admin, **saya ingin** memverifikasi pengajuan dan memberikan tiket, **agar** izin pendakian sesuai dengan aturan.
 
-* **AC-1 (Validation - Kelengkapan):** Sistem mewajibkan pengisian NIK (16 digit), Nama, dan No. HP Kontak Darurat. Tombol "Bayar" tidak akan aktif jika salah satu kolom kosong.
-* **AC-2 (Validation - Format File):** Sistem hanya menerima unggahan dokumen identitas dalam format JPG, PNG, atau PDF dengan ukuran maksimal 2MB. File di luar ketentuan tersebut akan ditolak dengan pesan kesalahan yang sesuai.
-* **AC-3 (Error - Payment Timeout):** Jika pembayaran tidak diselesaikan dalam waktu 15 menit (untuk metode QRIS), sistem secara otomatis membatalkan pesanan dan mengembalikan kuota pendakian ke status tersedia.
+* **AC-1 (Normal):** Admin dapat mengubah status menjadi "Disetujui" atau "Ditolak".
+* **AC-2 (Condition):** E-Ticket (PDF) hanya akan diterbitkan secara otomatis jika transaksi pembayaran telah diverifikasi (Status: Paid).
+* **AC-3 (Error - Alasan):** Jika admin menolak tanpa mengisi kolom "Alasan Penolakan", sistem akan mencegah penyimpanan data.
 
-### US-03: Informasi Katalog & Cuaca
-**Sebagai** Hiker,  
-**Saya ingin** melihat katalog gunung dan prediksi cuaca rute terkait,  
-**Agar** saya dapat mengantisipasi kondisi di lapangan.
+### US-03: Informasi Fasilitas Basecamp (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat informasi lengkap fasilitas basecamp, **agar** saya bisa mempersiapkan logistik.
 
-* **AC-1 (Normal):** Sistem menampilkan prakiraan cuaca (suhu, kelembapan, kondisi langit) untuk 3 hari ke depan berdasarkan koordinat rute.
-* **AC-2 (Alternative - API Failure):** Jika data cuaca gagal ditarik dari API (timeout/error), sistem menampilkan pesan "Informasi cuaca sedang tidak tersedia" dan menampilkan data terakhir yang tersimpan di cache (jika ada).
+* **AC-1 (Normal):** Menampilkan detail sumber air, parkir, dan kontak pengelola.
+* **AC-2 (Alternative):** Jika data belum diinput oleh admin, sistem menampilkan pesan "Informasi fasilitas sedang diperbarui" agar user tidak bingung.
 
-### US-04: Navigasi Luring (Offline Map)
-**Sebagai** Hiker,  
-**Saya ingin** mengunduh paket peta luring dan melacak posisi saya,  
-**Agar** saya tidak tersesat di area tanpa sinyal seluler.
+### US-04: Pengelolaan Data Fasilitas (Admin)
+**Sebagai** Admin, **saya ingin** memperbarui data fasilitas, **agar** informasi ke pendaki selalu akurat.
 
-* **AC-1 (Normal):** Sistem menampilkan progres unduhan dalam persentase (%) dan notifikasi "Unduhan Selesai".
-* **AC-2 (Error - Storage):** Jika ruang penyimpanan perangkat tidak mencukupi (<100MB), sistem membatalkan proses unduhan dan memberikan peringatan "Penyimpanan tidak mencukupi".
-* **AC-3 (Error - GPS):** Jika fitur lokasi (GPS) pada perangkat non-aktif, sistem menampilkan dialog permintaan aktivasi lokasi sebelum memulai navigasi.
+* **AC-1 (Normal):** Admin dapat melakukan CRUD (Tambah, Ubah, Hapus) data fasilitas jalur.
+* **AC-2 (Error - Sync):** Jika koneksi internet terputus saat menyimpan, sistem menampilkan pesan "Gagal sinkronisasi" dan tidak menghapus isian data di formulir.
 
----
+### US-05: Prediksi Cuaca Harian (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat prediksi cuaca di rute terkait, **agar** saya bisa mengantisipasi kondisi buruk.
 
-## 3. User Story & Acceptance Criteria (Admin - CMS)
+* **AC-1 (Normal):** Menampilkan ramalan cuaca 3 hari ke depan berdasarkan API Open-Meteo.
+* **AC-2 (Error - Timeout):** Jika API gagal ditarik, sistem menampilkan data *cache* terakhir dengan keterangan "Data terakhir diperbarui pada [Waktu]".
 
-### US-05: Dashboard Statistik & Laporan (Admin)
-**Sebagai** Admin,  
-**Saya ingin** melihat visualisasi statistik pendaftaran di dashboard,  
-**Agar** saya dapat memantau tren pendakian secara informatif.
+### US-06: Statistik Pendaftar / Dashboard (Admin)
+**Sebagai** Admin, **saya ingin** melihat grafik pendaftaran, **agar** dapat memantau tren pendakian.
 
-* **AC-1 (Filtering):** Sistem menyediakan filter rentang waktu (Harian, Mingguan, Bulanan, dan Custom Range) yang memperbarui data secara dinamis.
-* **AC-2 (Visualisasi):** Menampilkan **Bar Chart** untuk jumlah pendaftar per jalur pendakian dan **Pie Chart** untuk persentase status transaksi (Paid vs Unpaid).
-* **AC-3 (Data Integrity):** Setiap grafik harus dilengkapi dengan legenda yang jelas dan label nilai pada sumbu X dan Y untuk menghindari ambiguitas data.
+* **AC-1 (Filtering):** Tersedia filter berdasarkan rentang waktu (Harian, Mingguan, Bulanan).
+* **AC-2 (Visualisasi):** Menggunakan Bar Chart untuk jumlah pendaftar per jalur. Grafik wajib memiliki legenda dan label sumbu yang jelas.
+* **AC-3 (Clarity):** Saat *hover* pada grafik, muncul *tooltip* yang menunjukkan angka pasti pendaftar.
 
-### US-06: Manajemen Data Master & GPX (Superadmin)
-**Sebagai** Superadmin,  
-**Saya ingin** mengelola data rute dan mengunggah file navigasi GPX,  
-**Agar** peta navigasi di aplikasi mobile tetap akurat.
+### US-07: Unduhan Peta Jalur Offline (Hiker)
+**Sebagai** Pendaki, **saya ingin** mengunduh peta rute navigasi, **agar** tetap memiliki panduan arah tanpa sinyal.
 
-* **AC-1 (Validation):** Sistem melakukan validasi ekstensi file yang diunggah. Hanya file `.gpx` yang diterima; file dengan ekstensi lain akan memicu pesan "Format file ditolak".
-* **AC-2 (Safety):** Saat melakukan penghapusan data gunung atau rute, sistem wajib menampilkan dialog konfirmasi (*Double Confirmation*) untuk mencegah kehilangan data akibat kesalahan klik.
+* **AC-1 (Normal):** Menampilkan progres bar unduhan dalam persentase (%).
+* **AC-2 (Error - Memory):** Jika sisa memori ponsel <100MB, sistem membatalkan unduhan dan memberikan peringatan "Penyimpanan tidak cukup".
 
-### US-07: Verifikasi Check-in Scanner (Basecamp Staff)
-**Sebagai** Basecamp Staff,  
-**Saya ingin** memindai QR Code pada e-ticket pendaki,  
-**Agar** proses verifikasi di lapangan berjalan cepat.
+### US-08: Pelacakan Posisi / Navigasi (Hiker)
+**Sebagai** Pendaki, **saya ingin** melacak posisi saya pada peta luring, **agar** tetap berada di jalur resmi.
 
-* **AC-1 (Normal):** Sistem mengubah status sesi pendakian menjadi "On Track" sesaat setelah QR Code yang valid berhasil dipindai.
-* **AC-2 (Error - Invalid Ticket):** Jika QR Code tidak terdaftar, sudah kedaluwarsa, atau sudah pernah digunakan, sistem menampilkan indikator visual berwarna merah dengan pesan kesalahan yang spesifik.
-
-### US-08: Manajemen Jalur Lokal (Basecamp Staff)
-**Sebagai** Basecamp Staff,  
-**Saya ingin** memperbarui status operasional jalur yang ditugaskan,  
-**Agar** pendaki mendapatkan informasi terkini mengenai kondisi jalur.
-
-* **AC-1 (Normal):** Staff dapat mengubah status jalur menjadi "Buka", "Tutup Sementara", atau "Peringatan Cuaca Buruk".
-* **AC-2 (Error - Connection Failure):** Jika terjadi kegagalan koneksi saat melakukan update, sistem menampilkan pesan "Gagal memperbarui status rute, silakan coba lagi" dan tidak mengubah data sebelumnya.
+* **AC-1 (Normal):** Indikator posisi (blue dot) muncul secara real-time di atas jalur GPX.
+* **AC-2 (Error - GPS):** Jika sensor GPS mati, muncul dialog "Mohon aktifkan lokasi untuk memulai navigasi".
+* **AC-3 (Alternative):** Jika pendaki menyimpang >50 meter dari jalur, aplikasi memberikan peringatan suara/notifikasi "Anda keluar jalur".
