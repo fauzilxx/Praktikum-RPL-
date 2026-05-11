@@ -1,63 +1,140 @@
 # Peran Pengguna & User Story: AltiGuide (Revised)
 
 ## 1. Peran Pengguna (User Roles)
-* **Pendaki (Hiker):** Pengguna aplikasi (Mobile/Web) yang melakukan pendaftaran, pembayaran, dan navigasi.
-* **Superadmin:** Pihak yang mengelola data master (Gunung, Rute, User) melalui CMS.
-* **Basecamp Staff:** Petugas lapangan yang melakukan verifikasi tiket pendaki (*Check-in*) dan memantau rute lokal.
+* **Pendaki (Hiker):** Pengguna aplikasi (Mobile/Web) yang melakukan pendaftaran, eksplorasi rute, pembayaran SIMAKSI, dan navigasi lapangan.
+* **Superadmin:** Pengelola pusat yang mengontrol data master (Gunung, Rute, User, & GPX) melalui CMS Web.
+* **Basecamp Staff:** Petugas di gerbang jalur yang melakukan verifikasi tiket pendaki (*Check-in*) dan mengelola status operasional jalur lokal.
 
 ---
 
 ## 2. User Story & Acceptance Criteria
 
-### US-01: Pengajuan Simaksi Daring (Hiker)
-**Sebagai** Pendaki, **saya ingin** mengajukan Simaksi secara daring, **agar** saya bisa mendapatkan izin mendaki dengan lebih efisien.
+### [FITUR 1: AUTENTIKASI & MANAJEMEN AKUN]
 
-* **AC-1 (Normal):** Sistem menyediakan formulir data diri, jadwal, dan unggahan identitas.
-* **AC-2 (Include):** Pengguna wajib mengisi data seluruh anggota rombongan (Validasi NIK) sebelum lanjut ke pembayaran.
-* **AC-3 (Error - Validasi):** Jika kolom wajib kosong atau NIK tidak berjumlah 16 digit, muncul pesan error "Format data tidak valid".
-* **AC-4 (Error - Format File):** Jika file dokumen >2MB atau bukan format PDF/JPG, sistem menolak unggahan.
+#### US-01: Registrasi Akun Baru (Hiker)
+**Sebagai** Pendaki, **saya ingin** membuat akun baru dengan data diri lengkap, **agar** saya dapat menggunakan layanan AltiGuide dan data saya tercatat resmi untuk keselamatan.
+* **AC-1 (Normal):** Form mencakup Email, Password, NIK (16 digit), No HP, Alamat, dan Kontak Darurat.
+* **AC-2 (Error - Validasi):** Sistem menolak pendaftaran jika format email salah atau NIK tidak berjumlah tepat 16 digit.
+* **AC-3 (Error - Duplikasi):** Menampilkan pesan "Data sudah terdaftar" jika Email atau NIK sudah ada di database.
 
-### US-02: Verifikasi & E-Ticket (Admin/Staff)
-**Sebagai** Admin, **saya ingin** memverifikasi pengajuan dan memberikan tiket, **agar** izin pendakian sesuai dengan aturan.
+#### US-02: Login ke Sistem (Hiker)
+**Sebagai** Pendaki, **saya ingin** masuk ke akun saya, **agar** saya dapat mengakses fitur personal seperti riwayat transaksi.
+* **AC-1 (Normal):** Login berhasil menggunakan email dan password yang sesuai.
+* **AC-2 (Security):** Sistem menampilkan pesan "Kredensial salah" tanpa merinci letak kesalahan demi keamanan.
+* **AC-3 (Persistence):** Mobile menyimpan *token* di DataStore lokal; Web menggunakan *session cookie*.
 
-* **AC-1 (Normal):** Admin dapat mengubah status menjadi "Disetujui" atau "Ditolak".
-* **AC-2 (Condition):** E-Ticket (PDF) hanya akan diterbitkan secara otomatis jika transaksi pembayaran telah diverifikasi (Status: Paid).
-* **AC-3 (Error - Alasan):** Jika admin menolak tanpa mengisi kolom "Alasan Penolakan", sistem akan mencegah penyimpanan data.
+#### US-03: Lupa Password via OTP (Hiker)
+**Sebagai** Pendaki, **saya ingin** mereset password melalui OTP, **agar** saya dapat memulihkan akses akun jika lupa kredensial.
+* **AC-1 (Normal):** Verifikasi menggunakan kode OTP 6 digit yang dikirim ke email.
+* **AC-2 (Error - Expired):** Kode OTP hanya berlaku selama 15 menit. Jika lewat, user harus meminta kode baru.
 
-### US-03: Informasi Fasilitas Basecamp (Hiker)
-**Sebagai** Pendaki, **saya ingin** melihat informasi lengkap fasilitas basecamp, **agar** saya bisa mempersiapkan logistik.
+#### US-04: Logout dari Sistem (Hiker)
+**Sebagai** Pendaki, **saya ingin** keluar dari aplikasi, **agar** akun saya tetap aman.
+* **AC-1 (Normal):** Menghapus token di server dan lokal; mengarahkan user kembali ke halaman Login.
 
-* **AC-1 (Normal):** Menampilkan detail sumber air, parkir, dan kontak pengelola.
-* **AC-2 (Alternative):** Jika data belum diinput oleh admin, sistem menampilkan pesan "Informasi fasilitas sedang diperbarui" agar user tidak bingung.
+#### US-05: Lihat & Edit Profil (Hiker)
+**Sebagai** Pendaki, **saya ingin** memperbarui informasi profil, **agar** kontak darurat saya selalu akurat.
+* **AC-1 (Restriction):** Field Email dan NIK bersifat *read-only* (tidak dapat diubah) untuk validasi hukum SIMAKSI.
 
-### US-04: Pengelolaan Data Fasilitas (Admin)
-**Sebagai** Admin, **saya ingin** memperbarui data fasilitas, **agar** informasi ke pendaki selalu akurat.
+#### US-06: Ubah Kata Sandi (Hiker)
+**Sebagai** Pendaki, **saya ingin** mengubah password dari dalam aplikasi, **agar** keamanan akun terjaga berkala.
+* **AC-1 (Normal):** Wajib memasukkan password lama yang valid sebagai syarat pembuatan password baru.
 
-* **AC-1 (Normal):** Admin dapat melakukan CRUD (Tambah, Ubah, Hapus) data fasilitas jalur.
-* **AC-2 (Error - Sync):** Jika koneksi internet terputus saat menyimpan, sistem menampilkan pesan "Gagal sinkronisasi" dan tidak menghapus isian data di formulir.
+---
 
-### US-05: Prediksi Cuaca Harian (Hiker)
-**Sebagai** Pendaki, **saya ingin** melihat prediksi cuaca di rute terkait, **agar** saya bisa mengantisipasi kondisi buruk.
+### [FITUR 2: EKSPLORASI GUNUNG & RUTE]
 
-* **AC-1 (Normal):** Menampilkan ramalan cuaca 3 hari ke depan berdasarkan API Open-Meteo.
-* **AC-2 (Error - Timeout):** Jika API gagal ditarik, sistem menampilkan data *cache* terakhir dengan keterangan "Data terakhir diperbarui pada [Waktu]".
+#### US-07: Lihat Daftar Gunung (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat daftar gunung, **agar** saya dapat menentukan tujuan pendakian.
+* **AC-1 (Normal):** Menampilkan nama, mdpl, provinsi, dan status (Buka/Tutup) secara publik tanpa login.
 
-### US-06: Statistik Pendaftar / Dashboard (Admin)
-**Sebagai** Admin, **saya ingin** melihat grafik pendaftaran, **agar** dapat memantau tren pendakian.
+#### US-08: Detail Gunung & Pilihan Rute (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat rincian rute, **agar** saya dapat memilih jalur yang sesuai kemampuan.
+* **AC-1 (Normal):** Menampilkan deskripsi, tingkat kesulitan, jarak (km), dan biaya SIMAKSI.
 
-* **AC-1 (Filtering):** Tersedia filter berdasarkan rentang waktu (Harian, Mingguan, Bulanan).
-* **AC-2 (Visualisasi):** Menggunakan Bar Chart untuk jumlah pendaftar per jalur. Grafik wajib memiliki legenda dan label sumbu yang jelas.
-* **AC-3 (Clarity):** Saat *hover* pada grafik, muncul *tooltip* yang menunjukkan angka pasti pendaftar.
+#### US-09: Detail Rute & Waypoint (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat urutan pos, **agar** saya dapat merencanakan titik perbekalan air.
+* **AC-1 (Normal):** Waypoint ditampilkan berurutan (Basecamp ke Puncak) dengan indikator sumber air (✓/✗).
 
-### US-07: Unduhan Peta Jalur Offline (Hiker)
-**Sebagai** Pendaki, **saya ingin** mengunduh peta rute navigasi, **agar** tetap memiliki panduan arah tanpa sinyal.
+#### US-10: Informasi Cuaca Real-Time (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat cuaca di puncak dan basecamp, **agar** dapat mendaki dengan aman.
+* **AC-1 (Normal):** Mengambil data suhu dan angin dari API Open-Meteo berdasarkan koordinat gunung.
+* **AC-2 (Error - Timeout):** Jika API gagal, sistem menampilkan teks "Informasi cuaca sedang tidak tersedia".
 
-* **AC-1 (Normal):** Menampilkan progres bar unduhan dalam persentase (%).
-* **AC-2 (Error - Memory):** Jika sisa memori ponsel <100MB, sistem membatalkan unduhan dan memberikan peringatan "Penyimpanan tidak cukup".
+---
 
-### US-08: Pelacakan Posisi / Navigasi (Hiker)
-**Sebagai** Pendaki, **saya ingin** melacak posisi saya pada peta luring, **agar** tetap berada di jalur resmi.
+### [FITUR 3: PEMESANAN SIMAKSI - WEB ONLY]
 
-* **AC-1 (Normal):** Indikator posisi (blue dot) muncul secara real-time di atas jalur GPX.
-* **AC-2 (Error - GPS):** Jika sensor GPS mati, muncul dialog "Mohon aktifkan lokasi untuk memulai navigasi".
-* **AC-3 (Alternative):** Jika pendaki menyimpang >50 meter dari jalur, aplikasi memberikan peringatan suara/notifikasi "Anda keluar jalur".
+#### US-11: Membuat Booking SIMAKSI (Hiker)
+**Sebagai** Pendaki, **saya ingin** memesan izin mendaki daring, **agar** kuota pendakian saya terjamin.
+* **AC-1 (Validation):** Sistem memvalidasi sisa kuota harian. Jika penuh, sistem menolak pemesanan pada tanggal tersebut.
+
+#### US-12: Validasi NIK Anggota (Hiker)
+**Sebagai** Pendaki, **saya ingin** memvalidasi NIK anggota kelompok, **agar** memastikan semua anggota sudah punya akun.
+* **AC-1 (Error - Conflict):** Sistem menolak anggota yang sudah memiliki jadwal pendakian aktif (bentrok) di tanggal yang sama.
+
+#### US-13: Pembayaran QRIS (Hiker)
+**Sebagai** Pendaki, **saya ingin** membayar via QRIS, **agar** proses instan tanpa verifikasi manual.
+* **AC-1 (Condition):** Pembayaran kadaluarsa dalam 1 jam. Status otomatis berubah menjadi "Lunas" via Midtrans Webhook.
+
+#### US-14: Menerima E-Ticket (Hiker)
+**Sebagai** Pendaki, **saya ingin** mendapatkan E-Ticket, **agar** memiliki bukti resmi untuk petugas.
+* **AC-1 (Normal):** QR Code tiket diterbitkan secara otomatis hanya jika status pembayaran adalah "Lunas".
+
+---
+
+### [FITUR 4: RIWAYAT & E-TICKET]
+
+#### US-15: Lihat Riwayat Transaksi (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat semua riwayat pemesanan, **agar** dapat memantau status pembayaran.
+* **AC-1 (Normal):** Data sinkron antara Web dan Mobile melalui API pusat.
+
+#### US-16: Detail Transaksi (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat rincian pemesanan, **agar** dapat memastikan data perjalanan benar.
+* **AC-1 (Normal):** Menampilkan rincian biaya, daftar anggota, dan tombol unduh tiket jika sudah lunas.
+
+#### US-17: Unduh PDF E-Ticket (Hiker - Mobile Only)
+**Sebagai** Pendaki, **saya ingin** menyimpan tiket di HP, **agar** bisa ditunjukkan secara luring.
+* **AC-1 (Normal):** File PDF disimpan ke memori lokal dan dibuka via PDF Viewer sistem.
+
+---
+
+### [FITUR 5: NAVIGASI OFFLINE - MOBILE ONLY]
+
+#### US-18: Lihat Sesi Pendakian Aktif (Hiker)
+**Sebagai** Pendaki, **saya ingin** melihat sesi aktif, **agar** dapat memulai panduan navigasi lapangan.
+* **AC-1 (Normal):** Menampilkan status sesi (Siap / Dalam Pendakian / Selesai).
+
+#### US-19: Caching Navigasi Offline (Hiker)
+**Sebagai** Pendaki, **saya ingin** menyimpan data rute ke database lokal, **agar** peta bisa diakses tanpa sinyal.
+* **AC-1 (Normal):** Data waypoint disimpan otomatis ke Room DB lokal saat layar detail rute dibuka dalam kondisi online.
+* **AC-2 (Error - Storage):** Jika memori internal <100MB, sistem memberikan peringatan penyimpanan penuh.
+
+#### US-20: Navigasi Offline di Gunung (Hiker)
+**Sebagai** Pendaki, **saya ingin** menggunakan peta dari database lokal, **agar** tidak tersesat di area tanpa sinyal.
+* **AC-1 (Normal):** Menampilkan daftar checkpoint luring dengan banner indikator "Mode Offline".
+
+---
+
+### [FITUR 6: ADMIN & MANAJEMEN SISTEM - WEB ONLY]
+
+#### US-21: Login Panel Admin (Admin/Staff)
+**Sebagai** Admin, **saya ingin** masuk ke panel pengelola, **agar** manajemen data aman dari akses publik.
+* **AC-1 (Security):** Menggunakan URL khusus `/admin/login` dengan guard autentikasi terpisah.
+
+#### US-22: Kelola Data Gunung (Superadmin)
+**Sebagai** Superadmin, **saya ingin** melakukan CRUD data gunung, **agar** informasi sistem tetap mutakhir.
+* **AC-1 (Safety):** Gunung yang memiliki rute aktif tidak diizinkan untuk dihapus (proteksi data).
+
+#### US-23: Kelola Rute & Basecamp (Superadmin)
+**Sebagai** Superadmin, **saya ingin** mengelola info rute dan logistik, **agar** tarif dan kuota selalu akurat.
+* **AC-1 (Normal):** Mengatur tingkat kesulitan, estimasi waktu, dan detail ojek/fasilitas basecamp.
+
+#### US-24: Kelola Waypoint Rute (Superadmin)
+**Sebagai** Superadmin, **saya ingin** mengatur titik checkpoint, **agar** navigasi mobile sesuai kondisi lapangan.
+* **AC-1 (Normal):** Mengatur urutan pos menggunakan `order_index` untuk akurasi navigasi offline.
+
+#### US-25: Scan & Verifikasi E-Ticket (Staff)
+**Sebagai** Basecamp Staff, **saya ingin** memindai tiket pendaki, **agar** dapat memvalidasi izin masuk secara cepat.
+* **AC-1 (Normal):** Verifikasi berhasil jika status tiket "Lunas". Staff mengubah status sesi menjadi "On Track".
+* **AC-2 (Error - Invalid):** Menampilkan peringatan jika tiket sudah kadaluwarsa atau sudah pernah digunakan.
