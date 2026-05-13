@@ -3,8 +3,11 @@ package com.example.altiguide_mobile.di
 import android.content.Context
 import com.example.altiguide_mobile.data.network.AltiGuideApiService
 import com.example.altiguide_mobile.data.local.AltiGuideDatabase
+import com.example.altiguide_mobile.data.local.dao.RouteDao
+import com.example.altiguide_mobile.data.local.dao.WaypointDao
 import com.example.altiguide_mobile.util.AuthDataStore
 import androidx.room.Room
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -64,10 +67,15 @@ object AppModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val gson = GsonBuilder()
+            .setLenient()
+            .serializeNulls()
+            .create()
+
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
@@ -85,5 +93,17 @@ object AppModule {
             AltiGuideDatabase::class.java,
             "altiguide_database"
         ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRouteDao(database: AltiGuideDatabase): RouteDao {
+        return database.routeDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWaypointDao(database: AltiGuideDatabase): WaypointDao {
+        return database.waypointDao()
     }
 }

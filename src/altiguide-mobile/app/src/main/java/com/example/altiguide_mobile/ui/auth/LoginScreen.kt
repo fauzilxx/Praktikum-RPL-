@@ -78,6 +78,30 @@ fun LoginScreen(
             Text("Test Authorized Endpoints")
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                viewModel.testHikingSessions()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = testState !is UiState.Loading
+        ) {
+            Text("Test Hiking Sessions & Navigation")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                viewModel.testWeather()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = testState !is UiState.Loading
+        ) {
+            Text("Test Weather API")
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         // Observe UiState

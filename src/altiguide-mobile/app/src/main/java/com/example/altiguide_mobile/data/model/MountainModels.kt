@@ -25,6 +25,7 @@ data class RouteModel(
     val daily_quota: Int?,
     val latitude: Double?,
     val longitude: Double?,
+    val image: String? = null,
     val mountain: MountainModel?,
     val route_info: RouteInfoModel?,
     val waypoints: List<WaypointModel>?,
