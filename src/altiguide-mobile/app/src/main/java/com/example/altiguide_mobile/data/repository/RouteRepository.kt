@@ -57,8 +57,11 @@ class RouteRepository @Inject constructor(
         return route
     }
 
+    suspend fun getRouteWeather(id: Int): com.example.altiguide_mobile.data.model.WeatherResponse {
+        return apiService.getRouteWeather(id)
+    }
+
     // Offline support flows
     fun getCachedRoute(id: Int): Flow<CachedRoute?> = routeDao.getRoute(id)
     fun getCachedWaypoints(routeId: Int): Flow<List<CachedWaypoint>> = waypointDao.getWaypointsForRoute(routeId)
 }
-
