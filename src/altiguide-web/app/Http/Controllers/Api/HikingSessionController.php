@@ -85,10 +85,34 @@ class HikingSessionController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $session = $request->user()
-            ->hikingSessions()
-            ->with(['route.mountain', 'route.routeInfo', 'route.waypoints', 'members', 'transaction'])
-            ->findOrFail($id);
+        $session = HikingSession::with([
+            'route' => function ($query) {
+                $query->select([
+                    'id',
+                    'mountain_id',
+                    'name',
+                    'slug',
+                    'difficulty',
+                    'distance',
+                    'estimated_time',
+                    'latitude',
+                    'longitude',
+                    'track_coordinates'
+                ]);
+            },
+            'route.mountain:id,name,altitude',
+            'route.routeInfo',
+            'route.waypoints' => function ($query) {
+                $query->orderBy('order_index', 'asc');
+            },
+            'members',
+            'transaction'
+        ])
+        ->where('leader_id', auth()->id())
+        ->orWhereHas('members', function ($query) {
+            $query->where('user_id', auth()->id());
+        })
+        ->findOrFail($id);
 
         return response()->json($session);
     }

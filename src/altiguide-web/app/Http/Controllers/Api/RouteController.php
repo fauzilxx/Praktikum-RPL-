@@ -15,7 +15,26 @@ class RouteController extends Controller
      */
     public function index()
     {
-        $routes = Route::with(['mountain', 'routeInfo'])->get();
+        $routes = Route::with([
+            'mountain:id,name,altitude,latitude,longitude',
+            'routeInfo'
+        ])
+        ->select([
+            'id',
+            'mountain_id',
+            'name',
+            'slug',
+            'difficulty',
+            'distance',
+            'estimated_time',
+            'daily_quota',
+            'latitude',
+            'longitude',
+            'is_active',
+            'image'
+        ])
+        ->where('is_active', true)
+        ->get();
 
         return response()->json($routes);
     }
@@ -25,7 +44,29 @@ class RouteController extends Controller
      */
     public function show($id)
     {
-        $route = Route::with(['mountain', 'routeInfo', 'waypoints'])->findOrFail($id);
+        $route = Route::with([
+            'mountain:id,name,altitude,latitude,longitude',
+            'routeInfo',
+            'waypoints' => function ($query) {
+                $query->orderBy('order_index', 'asc');
+            }
+        ])
+        ->select([
+            'id',
+            'mountain_id',
+            'name',
+            'slug',
+            'difficulty',
+            'distance',
+            'estimated_time',
+            'daily_quota',
+            'latitude',
+            'longitude',
+            'is_active',
+            'image',
+            'track_coordinates'
+        ])
+        ->findOrFail($id);
 
         return response()->json($route);
     }

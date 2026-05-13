@@ -15,7 +15,38 @@ class MountainController extends Controller
      */
     public function index()
     {
-        $mountains = Mountain::with('routes')->get();
+        $mountains = Mountain::with([
+            'routes' => function ($query) {
+                $query->select([
+                    'id',
+                    'mountain_id',
+                    'name',
+                    'slug',
+                    'difficulty',
+                    'distance',
+                    'estimated_time',
+                    'daily_quota',
+                    'latitude',
+                    'longitude',
+                    'is_active',
+                    'image'
+                ]);
+            },
+            'routes.routeInfo'
+        ])
+        ->select([
+            'id',
+            'name',
+            'slug',
+            'altitude',
+            'latitude',
+            'longitude',
+            'description',
+            'image',
+            'status'
+        ])
+        ->where('status', 'open')
+        ->get();
 
         return response()->json($mountains);
     }
@@ -25,7 +56,30 @@ class MountainController extends Controller
      */
     public function show($id)
     {
-        $mountain = Mountain::with(['routes.routeInfo', 'routes.waypoints'])->findOrFail($id);
+        $mountain = Mountain::with([
+            'routes' => function ($query) {
+                $query->select([
+                    'id',
+                    'mountain_id',
+                    'name',
+                    'slug',
+                    'difficulty',
+                    'distance',
+                    'estimated_time',
+                    'daily_quota',
+                    'latitude',
+                    'longitude',
+                    'is_active',
+                    'image',
+                    'track_coordinates'
+                ]);
+            },
+            'routes.routeInfo',
+            'routes.waypoints' => function ($query) {
+                $query->orderBy('order_index', 'asc');
+            }
+        ])
+        ->findOrFail($id);
 
         return response()->json($mountain);
     }
